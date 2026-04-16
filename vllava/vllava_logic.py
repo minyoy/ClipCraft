@@ -1,4 +1,3 @@
-
 import torch
 from transformers import VideoLlavaForConditionalGeneration, VideoLlavaProcessor
 import av
@@ -19,13 +18,13 @@ model = VideoLlavaForConditionalGeneration.from_pretrained(
 )
 print("✅ Model loaded successfully!")
 
-# 2. 영상 프레임 추출
+# 2. 영상 프레임 추출 (에러 고친 버전)
 def read_video_pyav(container, indices):
     frames = []
     container.seek(0)
     for i, frame in enumerate(container.decode(video=0)):
         if i in indices:
-            frames.append(frame.to_nd_array(format="rgb24"))
+            frames.append(frame.to_ndarray(format="rgb24"))
     return np.stack(frames)
 
 # 3. 경로 설정
@@ -40,14 +39,19 @@ if os.path.exists(video_path):
     indices = np.arange(0, total_frames, total_frames / 8).astype(int)
     video = read_video_pyav(container, indices)
 
-    prompt = "USER: <video>\nIs the person pouring oyster sauce? Analyze color and texture. ASSISTANT:"
+    # 💡 질문을 '굴소스' 언급 없이 중립적으로 변경!
+    prompt = (
+        "USER: <video>\n"
+        "Describe the main action in this video in detail. "
+        "What specific ingredient is the person adding to the dish? "
+        "Is it a liquid sauce or a green vegetable? "
+        "ASSISTANT:"
+    )
+    
     inputs = processor(text=prompt, videos=video, return_tensors="pt").to("cuda", torch.float16)
     generate_ids = model.generate(**inputs, max_new_tokens=200)
     answer = processor.batch_decode(generate_ids, skip_special_tokens=True)[0]
 
-    print("\n🎬 [분석 결과]\n", answer)
+    print("\n🎬 [재분석 결과]\n", answer)
 else:
     print(f"❌ 영상을 찾을 수 없습니다.")
-    folder_path = "/home/vllava_docker/ClipCraft/clip_search/clips/pouring_oyster_sauce_into_a_bowl/"
-    if os.path.exists(folder_path):
-        print("현재 폴더 파일 목록:", os.listdir(folder_path))
