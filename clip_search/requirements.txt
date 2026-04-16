@@ -6,3 +6,10 @@ opencv-python>=4.8.0
 Pillow>=10.0.0
 numpy>=1.24.0
 scipy>=1.11.0
+
+# V-LLaVA 및 영상 처리를 위해 꼭 추가해야 할 것들
+transformers>=4.37.0
+accelerate
+bitsandbytes
+av
+torchaudio
