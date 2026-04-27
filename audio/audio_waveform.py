@@ -1,0 +1,68 @@
+# audio_waveform.py
+
+import json
+import numpy as np
+import librosa
+
+
+def extract_audio_waveform(
+    file_path: str,
+    bar_count: int = 88,
+    sample_rate: int = 16000,
+) -> dict:
+    """
+    영상/오디오 파일에서 UI 표시용 오디오 파형 데이터를 추출한다.
+
+    Returns:
+        {
+            "duration": float,
+            "barCount": int,
+            "amplitudes": List[float]
+        }
+    """
+
+    # mono=True: 스테레오를 단일 채널로 변환
+    y, sr = librosa.load(file_path, sr=sample_rate, mono=True)
+
+    duration = librosa.get_duration(y=y, sr=sr)
+
+    if len(y) == 0:
+        return {
+            "duration": 0,
+            "barCount": bar_count,
+            "amplitudes": [0.0] * bar_count,
+        }
+
+    # 전체 PCM을 bar_count개 구간으로 나눔
+    chunks = np.array_split(y, bar_count)
+
+    amplitudes = []
+
+    for chunk in chunks:
+        if len(chunk) == 0:
+            amplitudes.append(0.0)
+        else:
+            # 해당 구간의 최대 진폭
+            amp = float(np.max(np.abs(chunk)))
+            amplitudes.append(amp)
+
+    # 0~1 정규화
+    max_amp = max(amplitudes)
+
+    if max_amp > 0:
+        amplitudes = [amp / max_amp for amp in amplitudes]
+
+    return {
+        "duration": round(duration, 3),
+        "barCount": bar_count,
+        "amplitudes": amplitudes,
+    }
+
+
+if __name__ == "__main__":
+    result = extract_audio_waveform(
+        file_path="../clip_search/example.mov",
+        bar_count=88,
+    )
+
+    print(json.dumps(result, ensure_ascii=False, indent=2))
