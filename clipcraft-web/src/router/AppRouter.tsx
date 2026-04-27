@@ -1,0 +1,87 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import AnalyzingScreen from '../pages/AnalyzingScreen';
+import EditorScreen from '../pages/EditorScreen';
+import UploadScreen from '../pages/UploadScreen';
+import { pageTransition } from '../lib/animations';
+import type { HighlightAnalysisResult } from '../types/app';
+
+function UploadRoute() {
+  const navigate = useNavigate();
+  return <UploadScreen onNext={(result) => navigate('/analyzing', { state: result })} />;
+}
+
+function AnalyzingRoute() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const analysisResult = location.state as HighlightAnalysisResult | null;
+
+  if (!analysisResult?.segments?.length) return <Navigate to="/" replace />;
+
+  return <AnalyzingScreen onDone={() => navigate('/editor', { state: analysisResult })} />;
+}
+
+function EditorRoute() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const analysisResult = location.state as HighlightAnalysisResult | null;
+
+  if (!analysisResult?.segments?.length) return <Navigate to="/" replace />;
+
+  return (
+    <EditorScreen
+      analysis={analysisResult}
+      videoName={analysisResult.videoName}
+      videoUrl={analysisResult.videoUrl}
+      onBack={() => navigate('/')}
+    />
+  );
+}
+
+export default function AppRouter() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
+            <motion.div className="min-h-screen" initial="hidden" animate="visible" exit="exit" variants={pageTransition}>
+              <UploadRoute />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/analyzing"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <AnalyzingRoute />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/editor"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4, ease: 'easeInOut' }}
+            >
+              <EditorRoute />
+            </motion.div>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
