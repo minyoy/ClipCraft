@@ -1,31 +1,30 @@
 import json
 import re
 
-from llama_cpp import Llama
+from openai import OpenAI
 
 
 _SYSTEM_PROMPT = (
-    "You are generating CLIP search queries.\n\n"
-    "Convert Korean input into one short English visual description.\n\n"
+    "You are a CLIP query generator.\n"
+    "Do NOT explain. Do NOT think step-by-step.\n"
+    "Output ONLY the final answer.\n\n"
+    "Task:\n"
+    "Convert Korean input into ONE short English visual description.\n\n"
     "Rules:\n"
-    "- Max 10 words per sentence\n"
-    "- No explanation\n"
-    "- No abstract words\n"
+    "- Max 10 words\n"
     "- Only visible objects and actions\n"
     "- Use simple nouns and verbs\n"
-    "- Avoid person/someone\n"
-    "- Output only one JSON string"
+    "- No abstract words\n"
+    "- No person/someone\n"
+    "Output format:\n"
+    "{\"query\": \"...\"}\n"
 )
 
 
-class QwenQueryExpander:
-    def __init__(self, model_path: str = "./models/qwen-q4.gguf") -> None:
-        self._llm = Llama(
-            model_path=model_path,
-            n_ctx=1024,
-            n_gpu_layers=-1,
-            verbose=False,
-        )
+class OpenAIQueryExpander:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
+        self._client = OpenAI()
+        self._model = model
 
     def expand(self, korean_query: str) -> str:
         messages = [
@@ -38,8 +37,14 @@ class QwenQueryExpander:
                 ),
             },
         ]
-        response = self._llm.create_chat_completion(messages=messages, max_tokens=80)
-        raw_text = response["choices"][0]["message"]["content"].strip()
+        response = self._client.chat.completions.create(
+            model=self._model,
+            messages=messages,
+            max_tokens=80,
+            temperature=0,
+            response_format={"type": "json_object"},
+        )
+        raw_text = response.choices[0].message.content.strip()
         query = self._parse_query(raw_text)
         if not query:
             query = korean_query
@@ -49,22 +54,24 @@ class QwenQueryExpander:
 
     @staticmethod
     def _parse_query(raw_text: str) -> str:
-        raw_text = QwenQueryExpander._strip_thinking(raw_text)
+        raw_text = OpenAIQueryExpander._strip_thinking(raw_text)
 
         try:
             parsed = json.loads(raw_text)
+            if isinstance(parsed, dict):
+                return OpenAIQueryExpander._clean_query(str(parsed.get("query", "")))
             if isinstance(parsed, list):
                 for item in parsed:
-                    query = QwenQueryExpander._clean_query(str(item))
+                    query = OpenAIQueryExpander._clean_query(str(item))
                     if query:
                         return query
             elif isinstance(parsed, str) and parsed.strip():
-                return QwenQueryExpander._clean_query(parsed)
+                return OpenAIQueryExpander._clean_query(parsed)
         except json.JSONDecodeError:
             pass
 
         for line in raw_text.splitlines():
-            cleaned = QwenQueryExpander._clean_query(line)
+            cleaned = OpenAIQueryExpander._clean_query(line)
             if cleaned:
                 return cleaned
 

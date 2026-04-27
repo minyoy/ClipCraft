@@ -6,7 +6,7 @@ import json
 from orchestration.pipeline import VideoSearchPipeline
 from services import (
     ClipEmbedder,
-    QwenQueryExpander,
+    OpenAIQueryExpander,
     OpenCVClipSaver,
     OpenCVFrameSampler,
     SegmentDetector,
@@ -19,7 +19,7 @@ def build_pipeline(
     batch_size: int = 32,
     clip_model: str = "ViT-L/14",
 ) -> VideoSearchPipeline:
-    query_expander = QwenQueryExpander()
+    query_expander = OpenAIQueryExpander()
     embedder = ClipEmbedder(model_name=clip_model)
     frame_sampler = OpenCVFrameSampler()
     similarity_computer = SimilarityAnalyzer(
