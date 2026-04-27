@@ -202,7 +202,7 @@ def extract_segments(
     timestamps: List[float],
     smooth_window: int = 5,
     min_duration: float = 2.0,
-    top_k: int = 3,
+    top_k: int = 1, # 잠깐 1로 변경
 ) -> List[dict]:
     """Extract time segments whose smoothed similarity exceeds an adaptive threshold.
 
