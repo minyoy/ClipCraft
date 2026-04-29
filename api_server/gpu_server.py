@@ -9,8 +9,8 @@ project_root = os.path.dirname(current_dir)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from clip_search.pipeline import run_pipeline[cite: 4]
-from videollava.vllava import VideoLLaVAVerifier[cite: 2]
+from clip_search.pipeline import run_pipeline
+from videollava.vllava import VideoLLaVAVerifier
 
 app = FastAPI()
 
