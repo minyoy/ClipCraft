@@ -122,3 +122,4 @@ class VideoLLaVAVerifier:
             return final_cand.get('start', 0.0), final_cand.get('end', 0.0)
         
         return 0.0, 0.0
+
