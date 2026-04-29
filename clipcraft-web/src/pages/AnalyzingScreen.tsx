@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { requestAnalyze } from '../api/analyze';
 import { useTheme } from '../App';
 import Logo from '../components/Logo';
 import MonoLabel from '../components/MonoLabel';
+import PillButton from '../components/PillButton';
+import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
 
 const ANALYSIS_STEPS = [
   { id: 0, label: '영상 파일 수신 중', sub: 'GPU 서버로 전송하는 중...', duration: 1800 },
@@ -13,14 +16,17 @@ const ANALYSIS_STEPS = [
 ];
 
 interface AnalyzingScreenProps {
-  onDone: () => void;
+  request: PendingHighlightAnalysis;
+  onDone: (result: HighlightAnalysisResult) => void;
+  onBack: () => void;
 }
 
-export default function AnalyzingScreen({ onDone }: AnalyzingScreenProps) {
+export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingScreenProps) {
   const { accent } = useTheme();
   const [stepIdx, setStepIdx] = useState(0);
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [logLines, setLogLines] = useState<string[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
   const onDoneRef = useRef(onDone);
@@ -29,35 +35,79 @@ export default function AnalyzingScreen({ onDone }: AnalyzingScreenProps) {
   const totalDuration = ANALYSIS_STEPS.reduce((s, t) => s + t.duration, 0);
 
   useEffect(() => {
-    let elapsed = 0;
-    let currentStep = 0;
-    let stepElapsed = 0;
-    const interval = 40;
+    let cancelled = false;
+    let timer: number | undefined;
 
-    const timer = setInterval(() => {
-      elapsed += interval;
-      stepElapsed += interval;
+    const startTimeout = window.setTimeout(() => {
+      if (cancelled) return;
 
-      const step = ANALYSIS_STEPS[currentStep];
-      const pct = Math.min(1, stepElapsed / step.duration);
-      setProgress(Math.round((elapsed / totalDuration) * 100));
+      let elapsed = 0;
+      let currentStep = 0;
+      let stepElapsed = 0;
+      const interval = 40;
 
-      if (pct >= 1) {
-        setLogLines((prev) => [...prev, `✓  ${step.label}`]);
-        if (currentStep < ANALYSIS_STEPS.length - 1) {
-          currentStep++;
-          stepElapsed = 0;
-          setStepIdx(currentStep);
-        } else {
-          clearInterval(timer);
-          setDone(true);
-          setTimeout(() => onDoneRef.current(), 900);
+      timer = window.setInterval(() => {
+        elapsed += interval;
+        stepElapsed += interval;
+
+        const step = ANALYSIS_STEPS[currentStep];
+        const pct = Math.min(1, stepElapsed / step.duration);
+        setProgress(Math.min(95, Math.round((elapsed / totalDuration) * 100)));
+
+        if (pct >= 1) {
+          setLogLines((prev) => [...prev, `✓  ${step.label}`]);
+          if (currentStep < ANALYSIS_STEPS.length - 1) {
+            currentStep++;
+            stepElapsed = 0;
+            setStepIdx(currentStep);
+          } else {
+            window.clearInterval(timer);
+            setProgress(95);
+          }
         }
-      }
-    }, interval);
+      }, interval);
 
-    return () => clearInterval(timer);
-  }, [totalDuration]);
+      const apiStart = performance.now();
+      requestAnalyze(request.file, request.scenarios, request.projectName)
+        .then((analysis) => {
+          if (cancelled) return;
+          console.log(`[ClipCraft] API 응답 시간: ${((performance.now() - apiStart) / 1000).toFixed(2)}s`);
+
+          if (timer !== undefined) window.clearInterval(timer);
+          setLogLines((prev) => {
+            const completed = new Set(prev.map((line) => line.replace(/^✓\s+/, '')));
+            const remaining = ANALYSIS_STEPS.filter((step) => !completed.has(step.label)).map((step) => `✓  ${step.label}`);
+            return [...prev, ...remaining];
+          });
+          setProgress(100);
+          setDone(true);
+
+          window.setTimeout(() => {
+            if (!cancelled) {
+              onDoneRef.current({
+                ...analysis,
+                projectName: analysis.projectName,
+                videoUrl: request.videoUrl,
+                videoName: request.videoName,
+              });
+            }
+          }, 700);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          console.log(`[ClipCraft] API 응답 시간 (실패): ${((performance.now() - apiStart) / 1000).toFixed(2)}s`);
+
+          if (timer !== undefined) window.clearInterval(timer);
+          setError('분석 요청에 실패했습니다. API 주소와 서버 상태를 확인해 주세요.');
+        });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(startTimeout);
+      if (timer !== undefined) window.clearInterval(timer);
+    };
+  }, [request.file, request.projectName, request.scenarios, request.videoName, request.videoUrl, totalDuration]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -128,7 +178,9 @@ export default function AnalyzingScreen({ onDone }: AnalyzingScreenProps) {
               {done ? '분석 완료!' : '영상을 분석하고 있어요'}
             </h2>
             <p className="whitespace-pre-line text-[14px] leading-[1.55] tracking-[-0.1px] text-[rgba(0,0,0,0.38)]">
-              {done
+              {error
+                ? error
+                : done
                 ? '편집 화면으로 이동합니다...'
                 : 'GPU 서버에서 영상과 시나리오를 처리 중입니다.\n잠시만 기다려 주세요.'}
             </p>
@@ -152,10 +204,16 @@ export default function AnalyzingScreen({ onDone }: AnalyzingScreenProps) {
           </div>
           {!done && (
             <span className="font-mono text-[11.5px] tracking-[0.1px] text-[rgba(0,0,0,0.3)]">
-              {currentStep.sub}
+              {error || currentStep.sub}
             </span>
           )}
         </div>
+
+        {error && (
+          <PillButton variant="white" onClick={onBack} className="px-6 py-3 text-sm font-semibold">
+            업로드 화면으로 돌아가기
+          </PillButton>
+        )}
       </div>
     </div>
   );
