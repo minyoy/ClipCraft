@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Optional
 
 import clip
 import cv2
@@ -8,7 +8,7 @@ from PIL import Image
 
 
 class ClipEmbedder:
-    def __init__(self, model_name: str = "ViT-L/14", device: str | None = None) -> None:
+    def __init__(self, model_name: str = "ViT-L/14", device=None):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         print(f"[init] device: {self.device}")
         print(f"[init] loading CLIP model ({model_name}) ...")
