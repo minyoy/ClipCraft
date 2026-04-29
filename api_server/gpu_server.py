@@ -15,7 +15,15 @@ from videollava.vllava import VideoLLaVAVerifier
 app = FastAPI()
 
 # 서버 시작 시 모델을 미리 로드하여 속도 향상
-vllava_verifier = VideoLLaVAVerifier()
+vllava_verifier = None
+
+@app.on_event("startup")
+def load_model():
+    """서버가 시작될 때 딱 한 번만 모델을 로드합니다."""
+    global vllava_verifier
+    print("🚀 Video-LLaVA 모델 로딩 시작...")
+    vllava_verifier = VideoLLaVAVerifier()
+    print("✅ 모델 로딩 완료!")
 
 class GPUProcessRequest(BaseModel):
     video_path: str
@@ -24,6 +32,10 @@ class GPUProcessRequest(BaseModel):
 
 @app.post("/process")
 async def process_ai_logic(request: GPUProcessRequest):
+    # 모델 로드 여부 확인
+    if vllava_verifier is None:
+        return {"error": "Model not loaded yet"}
+    
     # 1. CLIP 기반 1단계 검색 실행[cite: 4]
     pipeline_result = run_pipeline(
         video_path=request.video_path,
@@ -45,4 +57,4 @@ async def process_ai_logic(request: GPUProcessRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run("api_server.gpu_server:app", host="0.0.0.0", port=8001, reload=False)
