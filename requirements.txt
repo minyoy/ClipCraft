@@ -1,0 +1,23 @@
+# ClipCraft 통합 requirements
+# Python 3.14.3 환경 기준 (pip3 list 기반 실제 설치 버전)
+
+# --- API 서버 (api_server/) ---
+fastapi==0.135.3
+uvicorn==0.43.0
+pydantic==2.12.5
+python-multipart==0.0.24
+
+# --- 오디오 분석 (audio/) ---
+librosa==0.11.0
+
+# --- 영상/CLIP 검색 (clip_search/) ---
+torch==2.11.0
+torchvision==0.26.0
+git+https://github.com/openai/CLIP.git
+opencv-python==4.13.0.92
+Pillow==12.1.1
+scipy==1.17.1
+openai==2.30.0
+
+# --- 공통 의존성 ---
+numpy==2.4.3

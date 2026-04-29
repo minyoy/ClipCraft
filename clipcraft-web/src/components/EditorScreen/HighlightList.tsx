@@ -7,7 +7,7 @@ function formatTime(seconds: number): string {
   return `${minutes}:${String(rest).padStart(2, '0')}`;
 }
 
-export default function HighlightList({ activeSegment, onSegmentClick, segments }: HighlightListProps) {
+export default function HighlightList({ activeSegment, onSegmentClick, segments, thumbnails }: HighlightListProps) {
   return (
     <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-5 py-4">
       {segments.map((segment, index) => {
@@ -35,8 +35,12 @@ export default function HighlightList({ activeSegment, onSegmentClick, segments 
               transform: isActive ? 'scale(1.01)' : 'scale(1)',
             }}
           >
-            <div className="relative flex h-[62px] w-[72px] shrink-0 items-center justify-center bg-[repeating-linear-gradient(135deg,#1a0800_0px,#1a0800_4px,#2a1200_4px,#2a1200_8px)]">
-              <span className="font-mono text-[7px] text-white/20 uppercase">clip</span>
+            <div className="relative flex w-[72px] shrink-0 self-stretch items-center justify-center overflow-hidden bg-[repeating-linear-gradient(135deg,#1a0800_0px,#1a0800_4px,#2a1200_4px,#2a1200_8px)]">
+              {thumbnails[segment.id] ? (
+                <img className="absolute inset-0 h-full w-full object-cover" src={thumbnails[segment.id]} alt="" />
+              ) : (
+                <span className="font-mono text-[7px] text-white/20 uppercase">clip</span>
+              )}
               <div className="absolute top-0 bottom-0 left-0 w-[3px]" style={{ background: border }} />
             </div>
             <div className="flex-1 px-3.5 py-2.5" style={{ background: tint }}>

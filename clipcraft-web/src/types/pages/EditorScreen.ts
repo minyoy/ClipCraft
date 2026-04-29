@@ -5,6 +5,7 @@ import type { ChatMessage as AppChatMessage, EditorHighlightSegment, HighlightAn
 export interface EditorScreenProps {
   onBack: () => void;
   analysis?: HighlightAnalysisData;
+  projectName?: string;
   videoUrl?: string;
   videoName?: string;
 }
@@ -27,6 +28,7 @@ export interface PlayerControlsProps {
 export interface WaveformTimelineProps {
   accent: string;
   duration: number;
+  onSegmentChange: (segmentId: number, edge: 'start' | 'end', time: number) => void;
   progress: number;
   segments: EditorHighlightSegment[];
   setPlaying: Dispatch<SetStateAction<boolean>>;
@@ -38,6 +40,7 @@ export interface HighlightListProps {
   activeSegment: number | null;
   onSegmentClick: (index: number) => void;
   segments: EditorHighlightSegment[];
+  thumbnails: Record<number, string>;
 }
 
 export interface AccentProps {

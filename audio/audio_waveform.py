@@ -1,8 +1,59 @@
 # audio_waveform.py
 
 import json
+import subprocess
 import numpy as np
-import librosa
+
+
+def _probe_duration(file_path: str) -> float:
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        file_path,
+    ]
+
+    try:
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        return float(result.stdout.strip())
+    except (subprocess.CalledProcessError, ValueError):
+        return 0.0
+
+
+def _load_audio_with_ffmpeg(file_path: str, sample_rate: int) -> tuple[np.ndarray, int]:
+    command = [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-i",
+        file_path,
+        "-vn",
+        "-ac",
+        "1",
+        "-ar",
+        str(sample_rate),
+        "-f",
+        "f32le",
+        "pipe:1",
+    ]
+
+    try:
+        result = subprocess.run(command, check=True, capture_output=True)
+    except subprocess.CalledProcessError as error:
+        if b"Output file does not contain any stream" in error.stderr:
+            return np.array([], dtype=np.float32), sample_rate
+        raise
+
+    audio = np.frombuffer(result.stdout, dtype=np.float32)
+    return audio, sample_rate
+
+
+def _load_audio(file_path: str, sample_rate: int) -> tuple[np.ndarray, int]:
+    return _load_audio_with_ffmpeg(file_path, sample_rate)
 
 
 def extract_audio_waveform(
@@ -22,13 +73,13 @@ def extract_audio_waveform(
     """
 
     # mono=True: 스테레오를 단일 채널로 변환
-    y, sr = librosa.load(file_path, sr=sample_rate, mono=True)
+    y, sr = _load_audio(file_path, sample_rate)
 
-    duration = librosa.get_duration(y=y, sr=sr)
+    duration = len(y) / sr if len(y) > 0 and sr > 0 else _probe_duration(file_path)
 
     if len(y) == 0:
         return {
-            "duration": 0,
+            "duration": round(duration, 3),
             "barCount": bar_count,
             "amplitudes": [0.0] * bar_count,
         }
@@ -61,7 +112,7 @@ def extract_audio_waveform(
 
 if __name__ == "__main__":
     result = extract_audio_waveform(
-        file_path="../clip_search/example.mov",
+        file_path="../clip_search/example1.mov",
         bar_count=88,
     )
 
