@@ -51,7 +51,7 @@ class VideoLLaVAVerifier:
         CLIP이 생성한 개별 클립 파일들을 하나씩 읽어서 시나리오에 맞는지 검증합니다.
         """
         if not candidates:
-            print("❌ [VLLaVA] 분석할 후보 클립 정보가 없습니다.")[cite: 2]
+            print("❌ [VLLaVA] 분석할 후보 클립 정보가 없습니다.")
             return 0.0, 0.0
 
         # CLIP이 파일을 저장한 폴더 경로 유추 (scenario_text 기반)
@@ -63,7 +63,7 @@ class VideoLLaVAVerifier:
         best_idx = -1
         max_score = -1.0
 
-        print(f"📂 [VLLaVA] 클립 저장 폴더 확인: {clip_folder}")[cite: 1]
+        print(f"📂 [VLLaVA] 클립 저장 폴더 확인: {clip_folder}")
 
         for idx, cand in enumerate(candidates):
             # 파일명 규칙: example_clip01.mp4, 02.mp4...
@@ -71,10 +71,10 @@ class VideoLLaVAVerifier:
             clip_path = os.path.join(clip_folder, clip_filename)
 
             if not os.path.exists(clip_path):
-                print(f"⚠️ [VLLaVA] 클립 파일을 찾을 수 없음: {clip_path}")[cite: 1]
+                print(f"⚠️ [VLLaVA] 클립 파일을 찾을 수 없음: {clip_path}")
                 continue
 
-            print(f"🎬 [VLLaVA] 후보 {idx+1}번 파일 분석 시작: {clip_filename}")[cite: 2]
+            print(f"🎬 [VLLaVA] 후보 {idx+1}번 파일 분석 시작: {clip_filename}")
 
             try:
                 # 1. 개별 클립 파일 열기[cite: 2]
@@ -106,20 +106,20 @@ class VideoLLaVAVerifier:
                 match = re.search(r"Score:\s*(\d+\.?\d*)", res_text)
                 score = float(match.group(1)) if match else 0.0
                 
-                print(f"   => 검증 점수: {score}/10")[cite: 2]
+                print(f"   => 검증 점수: {score}/10")
 
                 if score > max_score:
                     max_score = score
                     best_idx = idx
 
             except Exception as e:
-                print(f"⚠️ [VLLaVA] {clip_filename} 분석 중 에러: {e}")[cite: 2]
+                print(f"⚠️ [VLLaVA] {clip_filename} 분석 중 에러: {e}")
                 continue
 
         # 3. 가장 높은 점수를 받은 클립의 원래 시간대 반환[cite: 1]
         if best_idx != -1:
             final_cand = candidates[best_idx]
-            print(f"✅ [VLLaVA] 최종 선택된 클립: {best_idx+1}번 (점수: {max_score})")[cite: 2]
+            print(f"✅ [VLLaVA] 최종 선택된 클립: {best_idx+1}번 (점수: {max_score})")
             return final_cand.get('start', 0.0), final_cand.get('end', 0.0)
         
         return 0.0, 0.0
