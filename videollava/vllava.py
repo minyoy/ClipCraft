@@ -46,50 +46,80 @@ class VideoLLaVAVerifier:
             return None
         return np.stack(frames)
 
-    def verify_timestamp(self, video_path, scenario_text):
+    def verify_timestamp(self, video_path, scenario_text, candidates=None):
         """
-        CLIP이 찾은 후보 영상 내에서 시나리오에 해당하는 정확한 [시작, 끝] 초를 반환합니다.
+        CLIP이 생성한 개별 클립 파일들을 하나씩 읽어서 시나리오에 맞는지 검증합니다.
         """
-        if not os.path.exists(video_path):
-            print(f"❌ 영상을 찾을 수 없습니다: {video_path}")
+        if not candidates:
+            print("❌ [VLLaVA] 분석할 후보 클립 정보가 없습니다.")[cite: 2]
             return 0.0, 0.0
 
-        try:
-            container = av.open(video_path)
-            total_frames = container.streams.video[0].frames
-            
-            # 영상 전체에서 8개 프레임 균등 추출
-            indices = np.arange(0, total_frames, max(1, total_frames / 8)).astype(int)
-            video_frames = self._read_video_pyav(container, indices)
-            
-            if video_frames is None:
-                return 0.0, 0.0
+        # CLIP이 파일을 저장한 폴더 경로 유추 (scenario_text 기반)
+        # 예: ./output/Pouring_oyster_sauce_into_a_bowl/
+        folder_name = scenario_text.replace(" ", "_")
+        output_base_dir = "./output" 
+        clip_folder = os.path.join(output_base_dir, folder_name)
 
-            # Temporal Grounding을 유도하는 프롬프트
-            prompt = (
-                f"USER: <video>\nIn this video, exactly when does the following action occur: '{scenario_text}'? "
-                "Provide the start and end times in seconds as a list: [start_time, end_time]. "
-                "If not present, respond [0.0, 0.0]. ASSISTANT:"
-            )
-            
-            # 추론 수행
-            inputs = self.processor(text=prompt, videos=video_frames, return_tensors="pt").to(self.device)
-            if self.device == "cuda":
-                inputs = {k: v.to(torch.float16) if v.dtype == torch.float32 else v for k, v in inputs.items()}
+        best_idx = -1
+        max_score = -1.0
 
-            generate_ids = self.model.generate(**inputs, max_new_tokens=100)
-            answer = self.processor.batch_decode(generate_ids, skip_special_tokens=True)[0]
-            
-            # 답변 파싱 (정규표현식으로 숫자 리스트 추출)
-            res_text = answer.split("ASSISTANT:")[-1].strip()
-            numbers = re.findall(r"[-+]?\d*\.\d+|\d+", res_text)
-            
-            if len(numbers) >= 2:
-                start, end = float(numbers[0]), float(numbers[1])
-                return max(0.0, start), max(0.0, end)
-            
-            return 0.0, 0.0
+        print(f"📂 [VLLaVA] 클립 저장 폴더 확인: {clip_folder}")[cite: 1]
 
-        except Exception as e:
-            print(f"⚠️ V-LLaVA 분석 중 에러 발생: {e}")
-            return 0.0, 0.0
+        for idx, cand in enumerate(candidates):
+            # 파일명 규칙: example_clip01.mp4, 02.mp4...
+            clip_filename = f"example_clip{str(idx+1).zfill(2)}.mp4"
+            clip_path = os.path.join(clip_folder, clip_filename)
+
+            if not os.path.exists(clip_path):
+                print(f"⚠️ [VLLaVA] 클립 파일을 찾을 수 없음: {clip_path}")[cite: 1]
+                continue
+
+            print(f"🎬 [VLLaVA] 후보 {idx+1}번 파일 분석 시작: {clip_filename}")[cite: 2]
+
+            try:
+                # 1. 개별 클립 파일 열기[cite: 2]
+                container = av.open(clip_path)
+                total_frames = container.streams.video[0].frames
+                
+                # 클립 내에서 8개 프레임 추출[cite: 2]
+                indices = np.arange(0, total_frames, max(1, total_frames / 8)).astype(int)
+                video_frames = self._read_video_pyav(container, indices)
+
+                if video_frames is None: 
+                    continue
+
+                # 2. VLLaVA에게 이 짧은 클립이 정답인지 물어보기[cite: 2]
+                prompt = (
+                    f"USER: <video>\nDoes this video clip accurately show the action: '{scenario_text}'? "
+                    "Rate the relevance from 0 to 10. Respond only with the score: 'Score: X'. ASSISTANT:"
+                )
+                
+                inputs = self.processor(text=prompt, videos=video_frames, return_tensors="pt").to(self.device)
+                if self.device == "cuda":
+                    inputs = {k: v.to(torch.float16) if v.dtype == torch.float32 else v for k, v in inputs.items()}
+
+                generate_ids = self.model.generate(**inputs, max_new_tokens=50)
+                answer = self.processor.batch_decode(generate_ids, skip_special_tokens=True)[0]
+                res_text = answer.split("ASSISTANT:")[-1].strip()
+
+                # 점수 파싱 (예: Score: 9 -> 9.0)[cite: 2]
+                match = re.search(r"Score:\s*(\d+\.?\d*)", res_text)
+                score = float(match.group(1)) if match else 0.0
+                
+                print(f"   => 검증 점수: {score}/10")[cite: 2]
+
+                if score > max_score:
+                    max_score = score
+                    best_idx = idx
+
+            except Exception as e:
+                print(f"⚠️ [VLLaVA] {clip_filename} 분석 중 에러: {e}")[cite: 2]
+                continue
+
+        # 3. 가장 높은 점수를 받은 클립의 원래 시간대 반환[cite: 1]
+        if best_idx != -1:
+            final_cand = candidates[best_idx]
+            print(f"✅ [VLLaVA] 최종 선택된 클립: {best_idx+1}번 (점수: {max_score})")[cite: 2]
+            return final_cand.get('start', 0.0), final_cand.get('end', 0.0)
+        
+        return 0.0, 0.0
