@@ -48,7 +48,7 @@ class SimilarityAnalyzer:
     def _load_or_encode_image_embeddings(
         self,
         frames: List[np.ndarray],
-        cache_key: str | None,
+        cache_key: Optional[str],
     ) -> torch.Tensor:
         cache_path = self._cache_path(cache_key) if cache_key else None
         if cache_path and os.path.exists(cache_path):
@@ -72,7 +72,7 @@ class SimilarityAnalyzer:
 
         return image_embeddings
 
-    def _cache_path(self, cache_key: str | None) -> str | None:
+    def _cache_path(self, cache_key: Optional[str]) -> Optional[str]:
         if not cache_key:
             return None
         return os.path.join(self._cache_dir, f"{cache_key}.npy")
