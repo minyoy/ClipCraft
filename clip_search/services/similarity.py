@@ -4,7 +4,7 @@ from typing import List, Tuple
 import numpy as np
 import torch
 
-from core.protocols import QueryExpander, VisionTextEmbedder
+from clip_search.core.protocols import QueryExpander, VisionTextEmbedder
 
 
 class SimilarityAnalyzer:

@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from scipy.ndimage import uniform_filter1d
 
-from core.models import Segment
+from clip_search.core.models import Segment
 
 
 class SegmentDetector:

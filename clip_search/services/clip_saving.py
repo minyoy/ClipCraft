@@ -3,7 +3,7 @@ from typing import List
 
 import cv2
 
-from core.models import Segment
+from clip_search.core.models import Segment
 
 
 class OpenCVClipSaver:
