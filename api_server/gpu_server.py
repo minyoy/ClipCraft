@@ -36,23 +36,33 @@ async def process_ai_logic(request: GPUProcessRequest):
     if vllava_verifier is None:
         return {"error": "Model not loaded yet"}
     
-    # 1. CLIP 기반 1단계 검색 실행[cite: 4]
+    # 1. CLIP 기반 1단계 검색 실행
+    print(f"--- [1단계] CLIP 후보 구간 추출 시작: {request.query} ---")
     pipeline_result = run_pipeline(
         video_path=request.video_path,
         query=request.query,
         output_dir=request.output_dir
     )
     
-    # 2. Video-LLaVA 기반 2단계 시간 검증 (Temporal Grounding)[cite: 2]
-    # CLIP이 찾은 후보 구간을 더 정교하게 다듬습니다.
+    # CLIP이 찾은 후보 구간(segments)을 추출합니다.
+    # pipeline_result가 dict 형태인지 확인하여 안전하게 가져옵니다.
+    clip_candidates = pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result
+
+    # 2. Video-LLaVA 기반 2단계 시간 검증 (Temporal Grounding)
+    # ★수정포인트: CLIP이 찾은 후보 구간(clip_candidates)을 파라미터로 넘겨줍니다.
+    print(f"--- [2단계] Video-LLaVA 정밀 검증 시작 (후보군: {len(clip_candidates)}개) ---")
     vllava_start, vllava_end = vllava_verifier.verify_timestamp(
         video_path=request.video_path,
-        scenario_text=request.query
+        scenario_text=request.query,
+        candidates=clip_candidates  # 이 부분이 추가되어야 CLIP의 결과를 참고합니다!
     )
     
     return {
-        "clip_segments": pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result,
-        "vllava_refined": {"start": vllava_start, "end": vllava_end}
+        "clip_segments": clip_candidates,
+        "vllava_refined": {
+            "start": vllava_start, 
+            "end": vllava_end
+        }
     }
 
 if __name__ == "__main__":
