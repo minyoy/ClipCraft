@@ -4,7 +4,7 @@ import argparse
 import json
 
 from clip_search.orchestration.pipeline import VideoSearchPipeline
-from services import (
+from clip_search.services import (
     ClipEmbedder,
     OpenAIQueryExpander,
     OpenCVClipSaver,
