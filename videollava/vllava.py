@@ -64,14 +64,16 @@ class VideoLLaVAVerifier:
 
         for idx, cand in enumerate(candidates):
             # 파일명 규칙: example_clip01.mp4, 02.mp4...
-            clip_filename = f"example_clip{str(idx+1).zfill(2)}.mp4"
-            clip_path = os.path.join(clip_folder, clip_filename)
+            clip_path = cand.get('clip_path')
+
+            # 만약 clip_path가 없으면 예전처럼 파일명을 추측해서 조합합니다.
+            if not clip_path or not os.path.exists(clip_path):
+                clip_filename = f"example_clip{str(idx+1).zfill(2)}.mp4"
+                clip_path = os.path.join(target_dir, clip_filename)
 
             if not os.path.exists(clip_path):
-                print(f"⚠️ [VLLaVA] 클립 파일을 찾을 수 없음: {clip_path}")
+                print(f"⚠️ [VLLaVA] 파일을 찾을 수 없음: {clip_path}")
                 continue
-
-            print(f"🎬 [VLLaVA] 후보 {idx+1}번 파일 분석 시작: {clip_filename}")
 
             try:
                 # 1. 개별 클립 파일 열기[cite: 2]

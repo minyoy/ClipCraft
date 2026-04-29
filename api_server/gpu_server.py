@@ -53,11 +53,18 @@ async def process_ai_logic(request: GPUProcessRequest):
     # 2. Video-LLaVA 기반 2단계 시간 검증 (Temporal Grounding)
     # ★수정포인트: CLIP이 찾은 후보 구간(clip_candidates)을 파라미터로 넘겨줍니다.
     print(f"--- [2단계] Video-LLaVA 정밀 검증 시작 (후보군: {len(clip_candidates)}개) ---")
+
+    # 1번 클립의 경로에서 상위 폴더 경로를 추출해서 넘겨줍니다.
+    if clip_candidates and 'clip_path' in clip_candidates[0]:
+        actual_folder = os.path.dirname(clip_candidates[0]['clip_path']) # 실제 영어 폴더 경로 추출
+    else:
+        actual_folder = request.output_dir # 백업
+        
     vllava_start, vllava_end = vllava_verifier.verify_timestamp(
         video_path=request.video_path,
         scenario_text=request.query,
         candidates=clip_candidates,
-        clip_folder="./output/Pouring_oyster_sauce_into_a_bowl" 
+        clip_folder=actual_folder 
     )
     return {
         "clip_segments": clip_candidates,
