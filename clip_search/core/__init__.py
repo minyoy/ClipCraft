@@ -1,3 +1,3 @@
-from core.models import Segment
+from clip_search.core.models import Segment
 
 __all__ = ["Segment"]

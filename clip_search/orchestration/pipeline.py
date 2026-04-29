@@ -5,8 +5,8 @@ from typing import List
 
 import numpy as np
 
-from core.models import Segment
-from core.protocols import ClipSaver, FrameSampler, SegmentExtractor, SimilarityComputer
+from clip_search.core.models import Segment
+from clip_search.core.protocols import ClipSaver, FrameSampler, SegmentExtractor, SimilarityComputer
 
 
 class VideoSearchPipeline:
