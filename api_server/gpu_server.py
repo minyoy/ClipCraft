@@ -54,9 +54,9 @@ async def process_ai_logic(request: GPUProcessRequest):
     vllava_start, vllava_end = vllava_verifier.verify_timestamp(
         video_path=request.video_path,
         scenario_text=request.query,
-        candidates=clip_candidates  # 이 부분이 추가되어야 CLIP의 결과를 참고합니다!
+        candidates=clip_candidates,
+        clip_folder=request.output_dir  
     )
-    
     return {
         "clip_segments": clip_candidates,
         "vllava_refined": {

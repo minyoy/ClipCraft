@@ -46,24 +46,21 @@ class VideoLLaVAVerifier:
             return None
         return np.stack(frames)
 
-    def verify_timestamp(self, video_path, scenario_text, candidates=None):
+    def verify_timestamp(self, video_path, scenario_text, candidates=None, clip_folder=None):
         """
         CLIP이 생성한 개별 클립 파일들을 하나씩 읽어서 시나리오에 맞는지 검증합니다.
         """
         if not candidates:
             print("❌ [VLLaVA] 분석할 후보 클립 정보가 없습니다.")
             return 0.0, 0.0
-
-        # CLIP이 파일을 저장한 폴더 경로 유추 (scenario_text 기반)
-        # 예: ./output/Pouring_oyster_sauce_into_a_bowl/
-        folder_name = scenario_text.replace(" ", "_")
-        output_base_dir = "./output" 
-        clip_folder = os.path.join(output_base_dir, folder_name)
+        
+        # 1. 경로 설정: gpu_server에서 넘겨준 실제 경로를 우선 사용[cite: 1]
+        target_dir = clip_folder if clip_folder else os.path.join("./output", scenario_text.replace(" ", "_"))
 
         best_idx = -1
         max_score = -1.0
 
-        print(f"📂 [VLLaVA] 클립 저장 폴더 확인: {clip_folder}")
+        print(f"📂 [VLLaVA] 클립 저장 폴더 접근: {target_dir}")
 
         for idx, cand in enumerate(candidates):
             # 파일명 규칙: example_clip01.mp4, 02.mp4...
