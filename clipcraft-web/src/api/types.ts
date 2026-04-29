@@ -5,6 +5,14 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+export interface ApiStatusResponse<T> {
+  status: 'success' | 'error' | string;
+  project?: string;
+  results: T;
+  message?: string;
+  error?: string;
+}
+
 export interface ApiErrorBody {
   message?: string;
   error?: string;

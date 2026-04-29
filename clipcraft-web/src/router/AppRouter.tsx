@@ -4,7 +4,7 @@ import AnalyzingScreen from '../pages/AnalyzingScreen';
 import EditorScreen from '../pages/EditorScreen';
 import UploadScreen from '../pages/UploadScreen';
 import { pageTransition } from '../lib/animations';
-import type { HighlightAnalysisResult } from '../types/app';
+import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
 
 function UploadRoute() {
   const navigate = useNavigate();
@@ -14,11 +14,11 @@ function UploadRoute() {
 function AnalyzingRoute() {
   const location = useLocation();
   const navigate = useNavigate();
-  const analysisResult = location.state as HighlightAnalysisResult | null;
+  const pendingAnalysis = location.state as PendingHighlightAnalysis | null;
 
-  if (!analysisResult?.segments?.length) return <Navigate to="/" replace />;
+  if (!pendingAnalysis?.file || !pendingAnalysis.scenarios?.length) return <Navigate to="/" replace />;
 
-  return <AnalyzingScreen onDone={() => navigate('/editor', { state: analysisResult })} />;
+  return <AnalyzingScreen request={pendingAnalysis} onDone={(result) => navigate('/editor', { state: result })} onBack={() => navigate('/')} />;
 }
 
 function EditorRoute() {
@@ -31,6 +31,7 @@ function EditorRoute() {
   return (
     <EditorScreen
       analysis={analysisResult}
+      projectName={analysisResult.projectName}
       videoName={analysisResult.videoName}
       videoUrl={analysisResult.videoUrl}
       onBack={() => navigate('/')}
