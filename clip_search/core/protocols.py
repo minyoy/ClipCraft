@@ -1,4 +1,4 @@
-from typing import List, Protocol, Sequence, Tuple
+from typing import List, Protocol, Sequence, Tuple, Optional
 
 import numpy as np
 import torch
@@ -29,7 +29,7 @@ class SimilarityComputer(Protocol):
         self,
         frames: List[np.ndarray],
         korean_query: str,
-        cache_key: str | None = None,
+        cache_key: Optional[str] = None,
     ) -> Tuple[np.ndarray, str]:
         ...
 
