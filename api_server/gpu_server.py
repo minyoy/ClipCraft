@@ -49,7 +49,7 @@ async def process_ai_logic(request: GPUProcessRequest):
     clip_candidates = pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result
 
     actual_clip_dir = os.path.join(request.output_dir, request.query.replace(" ", "_"))
-    
+
     # 2. Video-LLaVA 기반 2단계 시간 검증 (Temporal Grounding)
     # ★수정포인트: CLIP이 찾은 후보 구간(clip_candidates)을 파라미터로 넘겨줍니다.
     print(f"--- [2단계] Video-LLaVA 정밀 검증 시작 (후보군: {len(clip_candidates)}개) ---")
@@ -57,7 +57,7 @@ async def process_ai_logic(request: GPUProcessRequest):
         video_path=request.video_path,
         scenario_text=request.query,
         candidates=clip_candidates,
-        clip_folder=actual_clip_dir 
+        clip_folder="./output/Pouring_oyster_sauce_into_a_bowl" 
     )
     return {
         "clip_segments": clip_candidates,
