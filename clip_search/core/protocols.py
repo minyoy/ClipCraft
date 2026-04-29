@@ -3,7 +3,7 @@ from typing import List, Protocol, Sequence, Tuple
 import numpy as np
 import torch
 
-from core.models import Segment
+from clip_search.core.models import Segment
 
 
 class QueryExpander(Protocol):
