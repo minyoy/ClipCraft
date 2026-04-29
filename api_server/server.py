@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 
-# [중요] 프로젝트 루트 경로를 시스템 경로에 추가 (orchestration, services 등을 찾기 위함)
+# 프로젝트 루트 경로를 시스템 경로에 추가 (orchestration, services 등을 찾기 위함)
 current_dir = os.path.dirname(os.path.abspath(__file__)) # api_server 폴더
 project_root = os.path.dirname(current_dir)             # ClipCraft 폴더
 clip_search_path = os.path.join(project_root, "clip_search")
@@ -15,8 +15,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 if clip_search_path not in sys.path:
     sys.path.insert(0, clip_search_path)
-    
-# 이제 에러 없이 불러올 수 있습니다.
+
 from clip_search.pipeline import run_pipeline
 from audio.audio_waveform import extract_audio_waveform
 
