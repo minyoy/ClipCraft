@@ -44,33 +44,38 @@ async def process_ai_logic(request: GPUProcessRequest):
         output_dir=request.output_dir
     )
     
-    # CLIP이 찾은 후보 구간(segments)을 추출합니다.
-    # pipeline_result가 dict 형태인지 확인하여 안전하게 가져옵니다.
+    # CLIP이 찾은 후보 구간(segments) 추출
     clip_candidates = pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result
-
     actual_clip_dir = os.path.join(request.output_dir, request.query.replace(" ", "_"))
-
+    
     # 2. Video-LLaVA 기반 2단계 시간 검증 (Temporal Grounding)
-    # ★수정포인트: CLIP이 찾은 후보 구간(clip_candidates)을 파라미터로 넘겨줍니다.
     print(f"--- [2단계] Video-LLaVA 정밀 검증 시작 (후보군: {len(clip_candidates)}개) ---")
-
-    # 1번 클립의 경로에서 상위 폴더 경로를 추출해서 넘겨줍니다.
-    if clip_candidates and 'clip_path' in clip_candidates[0]:
-        actual_folder = os.path.dirname(clip_candidates[0]['clip_path']) # 실제 영어 폴더 경로 추출
-    else:
-        actual_folder = request.output_dir # 백업
-        
-    vllava_start, vllava_end = vllava_verifier.verify_timestamp(
+    
+    # ★ 핵심 수정: 딕셔너리 형태로 한 번에 받아서 Unpacking 에러 방지
+    vllava_result = vllava_verifier.verify_timestamp(
         video_path=request.video_path,
         scenario_text=request.query,
         candidates=clip_candidates,
-        clip_folder=actual_folder 
+        clip_folder=actual_clip_dir 
     )
+
+    # 안전하게 결과값 추출
+    vllava_start = vllava_result.get("start", 0.0)
+    vllava_end = vllava_result.get("end", 0.0)
+    vllava_reason = vllava_result.get("reason", "No analysis provided")
+    
+    # 사용자 친화적인 클립 번호 생성 (0-index -> 1-index)
+    best_idx = vllava_result.get("best_idx")
+    vllava_selection = f"{best_idx + 1}번 클립" if best_idx is not None else "선택된 클립 없음"
+
+    # 최종 결과 반환[cite: 1]
     return {
         "clip_segments": clip_candidates,
         "vllava_refined": {
             "start": vllava_start, 
-            "end": vllava_end
+            "end": vllava_end,
+            "reason": vllava_reason,          # 모델 분석 내용 포함
+            "final_selection": vllava_selection # 최종 선택 클립 정보 포함
         }
     }
 
