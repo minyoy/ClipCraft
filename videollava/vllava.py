@@ -81,7 +81,7 @@ class VideoLLaVAVerifier:
                 total_frames = container.streams.video[0].frames
                 
                 # 클립 내에서 8개 프레임 추출
-                indices = np.arange(0, total_frames, max(1, total_frames / 8)).astype(int)
+                indices = np.arange(0, total_frames, max(1, total_frames / 12)).astype(int)
                 video_frames = self._read_video_pyav(container, indices)
 
                 if video_frames is None: 
@@ -89,8 +89,11 @@ class VideoLLaVAVerifier:
 
                 # 2. VLLaVA에게 이 짧은 클립이 정답인지 물어보기
                 prompt = (
-                    f"USER: <video>\nDoes this video clip accurately show the action: '{scenario_text}'? "
-                    "Rate the relevance from 0 to 10. Respond only with the score: 'Score: X'. ASSISTANT:"
+                    f"USER: <video>\n"
+                    f"Analyze this clip strictly. Does it clearly show the specific action: '{scenario_text}'?\n"
+                    "Look for definitive visual evidence (e.g., the container opening, the liquid falling, or the exact hand movement).\n"
+                    "If the action is vague or missing, give a low score. If it's perfectly captured, give a high score.\n"
+                    "Rate the relevance from 0 to 10. Respond ONLY with 'Score: X' (e.g., Score: 9.5). ASSISTANT:"
                 )
                 
                 inputs = self.processor(text=prompt, videos=video_frames, return_tensors="pt").to(self.device)
