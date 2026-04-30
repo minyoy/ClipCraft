@@ -90,29 +90,37 @@ class VideoLLaVAVerifier:
                 # 2. VLLaVA에게 이 짧은 클립이 정답인지 물어보기
                 prompt = (
                     f"USER: <video>\n"
-                    f"Analyze this clip strictly. Does it clearly show the specific action: '{scenario_text}'?\n"
-                    "Look for definitive visual evidence (e.g., the container opening, the liquid falling, or the exact hand movement).\n"
-                    "If the action is vague or missing, give a low score. If it's perfectly captured, give a high score.\n"
-                    "Rate the relevance from 0 to 10. Respond ONLY with 'Score: X' (e.g., Score: 9.5). ASSISTANT:"
+                    f"Step 1: Analyze this clip strictly. Does it clearly show the action: '{scenario_text}'?\n"
+                    "Step 2: Look for definitive visual evidence like the container opening, liquid falling, or hand movements.\n"
+                    "Step 3: Provide your answer in the following format:\n"
+                    "[Analysis] (Describe the visual evidence you found in one clear sentence)\n"
+                    "[Score] (Rate the relevance from 0 to 10 based on the evidence)\n"
+                    "If the action is vague, give a low score. Respond strictly in the format. ASSISTANT:"
                 )
                 
                 inputs = self.processor(text=prompt, videos=video_frames, return_tensors="pt").to(self.device)
                 if self.device == "cuda":
                     inputs = {k: v.to(torch.float16) if v.dtype == torch.float32 else v for k, v in inputs.items()}
 
-                generate_ids = self.model.generate(**inputs, max_new_tokens=50)
+                generate_ids = self.model.generate(**inputs, max_new_tokens=128)
                 answer = self.processor.batch_decode(generate_ids, skip_special_tokens=True)[0]
                 res_text = answer.split("ASSISTANT:")[-1].strip()
 
-                # 점수 파싱 (예: Score: 9 -> 9.0)[cite: 2]
-                match = re.search(r"score(?:\s+is|:)\s*(\d+\.?\d*)", res_text, re.IGNORECASE)
-                score = float(match.group(1)) if match else 0.0
-                
-                print(f"   => 검증 점수: {score}/10")
+                # [Analysis] 섹션 추출 (지예님이 원하시는 '답변' 내용)
+                analysis_match = re.search(r"\[Analysis\](.*?)\[Score\]", res_text, re.DOTALL | re.IGNORECASE)
+                reason_text = analysis_match.group(1).strip() if analysis_match else res_text
 
+                # [Score] 섹션 추출 (계산용 점수)
+                score_match = re.search(r"\[Score\]\s*(\d+\.?\d*)", res_text, re.IGNORECASE)
+                score = float(score_match.group(1)) if score_match else 0.0
+
+                print(f"   => 분석 내용: {reason_text}")
+                print(f"   => 검증 점수: {score}/10")
+                
                 if score > max_score:
                     max_score = score
                     best_idx = idx
+                    best_reason = reason_text
 
             except Exception as e:
                 print(f"⚠️ [VLLaVA] {clip_filename} 분석 중 에러: {e}")
@@ -124,7 +132,7 @@ class VideoLLaVAVerifier:
             return {
                 "start": final_cand.get('start', 0.0),
                 "end": final_cand.get('end', 0.0),
-                "reason": res_text,
+                "reason": best_reason,
                 "best_idx": best_idx  # ★ 이 줄을 반드시 추가해야 gpu_server가 읽을 수 있습니다!
             }
         return 0.0, 0.0
