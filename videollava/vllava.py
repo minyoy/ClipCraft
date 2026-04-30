@@ -122,7 +122,10 @@ class VideoLLaVAVerifier:
         if best_idx != -1:
             final_cand = candidates[best_idx]
             print(f"✅ [VLLaVA] 최종 선택된 클립: {best_idx+1}번 (점수: {max_score})")
-            return final_cand.get('start', 0.0), final_cand.get('end', 0.0)
-        
+            return {
+            "start": final_cand.get('start', 0.0),
+            "end": final_cand.get('end', 0.0),
+            "reason": res_text  # 모델이 실제로 한 말을 담습니다
+        }
         return 0.0, 0.0
 
