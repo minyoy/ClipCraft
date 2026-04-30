@@ -8,14 +8,14 @@ import re
 class VideoLLaVAVerifier:
     def __init__(self):
         """
-        모델 로드 및 초기화 (지예님의 GPU 서버 환경 반영)
+        모델 로드 및 초기화 (GPU 서버 환경 반영)
         """
         self.model_id = "LanguageBind/Video-LLaVA-7B-hf"
         self.cache_path = "/shareHost/jiye_model"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
         # GPU 메모리(VRAM) 최적화를 위한 4-bit 양자화 설정
-        # CLIP과 동시에 GPU를 사용할 때 OOM(Out of Memory)을 방지합니다.
+        # CLIP과 동시에 GPU를 사용할 때 OOM(Out of Memory) 방지
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
@@ -66,7 +66,7 @@ class VideoLLaVAVerifier:
             # 파일명 규칙: example_clip01.mp4, 02.mp4...
             clip_path = cand.get('clip_path')
 
-            # 만약 clip_path가 없으면 예전처럼 파일명을 추측해서 조합합니다.
+            # 만약 clip_path가 없으면 예전처럼 파일명을 추측해서 조합
             if not clip_path or not os.path.exists(clip_path):
                 clip_filename = f"example_clip{str(idx+1).zfill(2)}.mp4"
                 clip_path = os.path.join(target_dir, clip_filename)
@@ -76,18 +76,18 @@ class VideoLLaVAVerifier:
                 continue
 
             try:
-                # 1. 개별 클립 파일 열기[cite: 2]
+                # 1. 개별 클립 파일 열기
                 container = av.open(clip_path)
                 total_frames = container.streams.video[0].frames
                 
-                # 클립 내에서 8개 프레임 추출[cite: 2]
+                # 클립 내에서 8개 프레임 추출
                 indices = np.arange(0, total_frames, max(1, total_frames / 8)).astype(int)
                 video_frames = self._read_video_pyav(container, indices)
 
                 if video_frames is None: 
                     continue
 
-                # 2. VLLaVA에게 이 짧은 클립이 정답인지 물어보기[cite: 2]
+                # 2. VLLaVA에게 이 짧은 클립이 정답인지 물어보기
                 prompt = (
                     f"USER: <video>\nDoes this video clip accurately show the action: '{scenario_text}'? "
                     "Rate the relevance from 0 to 10. Respond only with the score: 'Score: X'. ASSISTANT:"
@@ -102,7 +102,7 @@ class VideoLLaVAVerifier:
                 res_text = answer.split("ASSISTANT:")[-1].strip()
 
                 # 점수 파싱 (예: Score: 9 -> 9.0)[cite: 2]
-                match = re.search(r"Score:\s*(\d+\.?\d*)", res_text)
+                match = re.search(r"score(?:\s+is|:)\s*(\d+\.?\d*)", res_text, re.IGNORECASE)
                 score = float(match.group(1)) if match else 0.0
                 
                 print(f"   => 검증 점수: {score}/10")
