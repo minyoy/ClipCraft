@@ -10,7 +10,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from clip_search.pipeline import run_pipeline
-from videollava.vllava import VideoLLaVAVerifier
+from videollava.vllava2 import VideoLLaVAVerifier
 
 app = FastAPI()
 
@@ -67,14 +67,16 @@ async def process_ai_logic(request: GPUProcessRequest):
     # 사용자 친화적인 클립 번호 생성 (0-index -> 1-index)
     best_idx = vllava_result.get("best_idx")
     vllava_selection = f"{best_idx + 1}번 클립" if best_idx is not None else "선택된 클립 없음"
-
+    vllava_confidence = vllava_result.get("confidence", 0.0)
+    
     # 최종 결과 반환[cite: 1]
     return {
         "clip_segments": clip_candidates,
         "vllava_refined": {
             "start": vllava_start, 
             "end": vllava_end,
-            "reason": vllava_reason,          # 모델 분석 내용 포함
+            "reason": vllava_reason,     
+            "confidence": vllava_confidence,     # 신뢰도 점수
             "final_selection": vllava_selection # 최종 선택 클립 정보 포함
         }
     }
