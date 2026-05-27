@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import AnalyzingScreen from '../pages/AnalyzingScreen';
+import AuthScreen from '../pages/AuthScreen';
 import EditorScreen from '../pages/EditorScreen';
+import ProjectsScreen from '../pages/ProjectsScreen';
 import UploadScreen from '../pages/UploadScreen';
 import { pageTransition } from '../lib/animations';
 import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
@@ -37,6 +39,16 @@ function EditorRoute() {
       onBack={() => navigate('/')}
     />
   );
+}
+
+function AuthRoute() {
+  const navigate = useNavigate();
+  return <AuthScreen onContinue={() => navigate('/projects')} />;
+}
+
+function ProjectsRoute() {
+  const navigate = useNavigate();
+  return <ProjectsScreen onStartNewProject={() => navigate('/')} />;
 }
 
 export default function AppRouter() {
@@ -78,6 +90,34 @@ export default function AppRouter() {
               transition={{ duration: 0.4, ease: 'easeInOut' }}
             >
               <EditorRoute />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/auth"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <AuthRoute />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <ProjectsRoute />
             </motion.div>
           }
         />
