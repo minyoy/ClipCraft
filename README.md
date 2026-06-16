@@ -19,7 +19,22 @@ ClipCraft/
 └── clipcraft-web/      # React 프론트엔드
 ```
 
-## 설치 및 실행
+## Docker 실행
+
+```bash
+docker compose up -d --build
+```
+
+기본 접속 주소:
+
+- 프론트엔드: http://localhost:5174
+- 백엔드: http://localhost:8001
+
+다른 Docker 프로젝트가 `8000`, `5173` 포트를 사용 중일 수 있어 호스트 포트는 각각 `8001`, `5174`로 열립니다. 컨테이너 내부에서는 프론트엔드가 `http://backend:8000`으로 백엔드에 연결합니다.
+
+분석할 영상은 백엔드 컨테이너의 `/app/clip_search/` 아래에서 접근 가능해야 합니다. 기본 프론트 설정은 업로드한 파일명으로 `/app/clip_search/{파일명}` 경로를 만들어 백엔드에 전달합니다.
+
+## 로컬 실행
 
 ### 1. 의존성 설치
 

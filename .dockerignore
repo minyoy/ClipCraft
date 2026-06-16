@@ -1,0 +1,11 @@
+.git
+.vscode
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.DS_Store
+**/node_modules
+clipcraft-web/dist
+clip_search/clips
+.clip_cache
+api_server/.clip_cache

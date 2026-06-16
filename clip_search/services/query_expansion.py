@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 from openai import OpenAI
@@ -23,10 +24,14 @@ _SYSTEM_PROMPT = (
 
 class OpenAIQueryExpander:
     def __init__(self, model: str = "gpt-4o-mini") -> None:
-        self._client = OpenAI()
+        self._client = OpenAI() if os.environ.get("OPENAI_API_KEY") else None
         self._model = model
 
     def expand(self, korean_query: str) -> str:
+        if self._client is None:
+            print("[expand] OPENAI_API_KEY is not set. Using the original query.")
+            return korean_query
+
         messages = [
             {"role": "system", "content": _SYSTEM_PROMPT},
             {

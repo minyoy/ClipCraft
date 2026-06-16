@@ -1,24 +1,25 @@
 import os
 import re
 import sys
-from fastapi import FastAPI
+import threading
+import time
+import uuid
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 
 # [중요] 프로젝트 루트 경로를 시스템 경로에 추가 (orchestration, services 등을 찾기 위함)
 current_dir = os.path.dirname(os.path.abspath(__file__)) # api_server 폴더
 project_root = os.path.dirname(current_dir)             # ClipCraft 폴더
-clip_search_path = os.path.join(project_root, "clip_search")
-
+clip_search_dir = os.path.join(project_root, "clip_search")
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-if clip_search_path not in sys.path:
-    sys.path.insert(0, clip_search_path)
-    
-# 이제 에러 없이 불러올 수 있습니다.
-from clip_search.pipeline import run_pipeline
+if clip_search_dir not in sys.path:
+    sys.path.insert(0, clip_search_dir)
+
 from audio.audio_waveform import extract_audio_waveform
+from pipeline import run_pipeline as run_clip_search_pipeline
 
 app = FastAPI()
 
@@ -34,44 +35,143 @@ class AnalysisRequest(BaseModel):
     video_path: str
     scenarios: List[str]
 
+class AnalysisJobStartResponse(BaseModel):
+    status: str
+    job_id: str
+
+class AnalysisJobStatus(BaseModel):
+    status: str
+    progress: int
+    step_id: int
+    step_label: str
+    message: str
+    logs: List[str]
+    project: str
+    results: List[dict]
+    error: Optional[str] = None
+
+ANALYSIS_STEPS = [
+    "영상 파일 수신 중",
+    "프레임 디코딩",
+    "씬 경계 감지",
+    "오디오 파형 분석",
+    "시나리오 매핑",
+    "하이라이트 구간 확정",
+]
+
+analysis_jobs: dict[str, dict] = {}
+analysis_jobs_lock = threading.Lock()
+
+def get_local_clip_search_config():
+    return {
+        "fps": float(os.environ.get("CLIP_SEARCH_FPS", "0.5")),
+        "batch_size": int(os.environ.get("CLIP_SEARCH_BATCH_SIZE", "32")),
+        "clip_model": os.environ.get("CLIP_SEARCH_MODEL", "ViT-B/32"),
+        "output_root": os.environ.get(
+            "CLIP_SEARCH_OUTPUT_ROOT",
+            os.path.join(project_root, "clip_search", "clips"),
+        ),
+    }
+
+def run_local_clip_search(
+    video_path: str,
+    query: str,
+    project_name: str,
+    scenario_folder_name: str,
+) -> dict:
+    config = get_local_clip_search_config()
+    safe_project = make_safe_name(project_name)
+    output_dir = os.path.join(
+        config["output_root"],
+        safe_project,
+        scenario_folder_name,
+    )
+    return run_clip_search_pipeline(
+        video_path=video_path,
+        query=query,
+        output_dir=output_dir,
+        fps=config["fps"],
+        batch_size=config["batch_size"],
+        clip_model=config["clip_model"],
+    )
+
 def make_safe_name(name: str):
     clean_name = re.sub(r'[\\/:*?"<>|]', "", name).strip().replace(" ", "_")
     return clean_name
 
-@app.post("/analyze")
-async def analyze(request: AnalysisRequest):
+def update_job(job_id: str, **updates):
+    with analysis_jobs_lock:
+        job = analysis_jobs.get(job_id)
+        if not job:
+            return
+        job.update(updates)
+        job["updated_at"] = time.time()
+
+def add_job_log(job_id: str, message: str):
+    with analysis_jobs_lock:
+        job = analysis_jobs.get(job_id)
+        if not job:
+            return
+        job["logs"] = [*job.get("logs", []), message]
+        job["updated_at"] = time.time()
+
+def run_analysis(request: AnalysisRequest, job_id: str | None = None):
     final_results = []
-    
-    # 1. 프로젝트 폴더 생성
+
+    if job_id:
+        update_job(job_id, status="running", progress=5, step_id=0, step_label=ANALYSIS_STEPS[0], message="분석 요청을 수신했습니다.")
+        add_job_log(job_id, f"✓  {ANALYSIS_STEPS[0]}")
+
     safe_project = make_safe_name(request.project_name)
-    clips_dir = os.path.join(project_root, "clip_search", "clips", safe_project)
-    os.makedirs(clips_dir, exist_ok=True)
-    
+
+    total_scenarios = max(1, len(request.scenarios))
+
     for i, query in enumerate(request.scenarios, start=1):
-        # 2. 폴더명 설정: sc1_시나리오내용
         safe_query_text = make_safe_name(query)[:30]
         scenario_folder_name = f"sc{i}_{safe_query_text}"
-        output_subdir = os.path.join(clips_dir, scenario_folder_name)
-        
-        # 3. 신규 파이프라인 실행
-        # 바뀐 run_pipeline은 이제 내부적으로 VideoSearchPipeline을 조립해서 실행합니다.
-        pipeline_result = run_pipeline(
+
+        scenario_base_progress = 10 + round(((i - 1) / total_scenarios) * 58)
+        if job_id:
+            update_job(
+                job_id,
+                progress=scenario_base_progress,
+                step_id=1,
+                step_label=ANALYSIS_STEPS[1],
+                message=f"{i}/{total_scenarios} 시나리오 프레임을 분석 중입니다.",
+            )
+
+        pipeline_result = run_local_clip_search(
             video_path=request.video_path,
             query=query,
-            output_dir=output_subdir
+            project_name=safe_project,
+            scenario_folder_name=scenario_folder_name,
         )
-        
-        # pipeline_result가 dict 형태라면 그 안에서 실제 세그먼트 데이터를 꺼내야 합니다.
-        # 보통 result["segments"] 형태이거나, 리스트 형태일 수 있습니다.
-        # 바뀐 코드에 맞춰 'segments' 키가 있는지 확인합니다.
+
+        if job_id:
+            update_job(
+                job_id,
+                progress=min(72, scenario_base_progress + 18),
+                step_id=2,
+                step_label=ANALYSIS_STEPS[2],
+                message=f"{i}/{total_scenarios} 시나리오의 후보 구간을 찾았습니다.",
+            )
+
         segments = pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result
-        
+
         if segments:
-            best = segments[0] # 가장 점수 높은 첫 번째 구간
-            
-            # 4. 오디오 분석 (원본 영상 기준)
+            best = segments[0]
+
+            if job_id:
+                update_job(
+                    job_id,
+                    progress=min(84, scenario_base_progress + 26),
+                    step_id=3,
+                    step_label=ANALYSIS_STEPS[3],
+                    message="오디오 파형을 추출 중입니다.",
+                )
+
             audio_data = extract_audio_waveform(request.video_path, bar_count=88)
-            
+
             final_results.append({
                 "project_name": request.project_name,
                 "id": i,
@@ -84,7 +184,88 @@ async def analyze(request: AnalysisRequest):
                     "amplitudes": audio_data["amplitudes"]
                 }
             })
-            
+
+        if job_id:
+            update_job(
+                job_id,
+                progress=min(92, 10 + round((i / total_scenarios) * 76)),
+                step_id=4,
+                step_label=ANALYSIS_STEPS[4],
+                message=f"{i}/{total_scenarios} 시나리오 결과를 매핑했습니다.",
+                results=final_results,
+            )
+            add_job_log(job_id, f"✓  {query}")
+
+    if job_id:
+        update_job(
+            job_id,
+            status="success",
+            progress=100,
+            step_id=5,
+            step_label=ANALYSIS_STEPS[5],
+            message="하이라이트 구간 확정 완료",
+            results=final_results,
+        )
+        add_job_log(job_id, f"✓  {ANALYSIS_STEPS[5]}")
+
+    return final_results
+
+def run_analysis_job(job_id: str, request: AnalysisRequest):
+    try:
+        run_analysis(request, job_id=job_id)
+    except Exception as error:
+        update_job(
+            job_id,
+            status="error",
+            error=str(error),
+            message="분석 요청에 실패했습니다.",
+        )
+
+@app.post("/analyze/jobs", response_model=AnalysisJobStartResponse)
+async def start_analyze_job(request: AnalysisRequest):
+    job_id = uuid.uuid4().hex
+    with analysis_jobs_lock:
+        analysis_jobs[job_id] = {
+            "status": "queued",
+            "progress": 0,
+            "step_id": 0,
+            "step_label": ANALYSIS_STEPS[0],
+            "message": "분석 대기 중입니다.",
+            "logs": [],
+            "project": request.project_name,
+            "results": [],
+            "error": None,
+            "created_at": time.time(),
+            "updated_at": time.time(),
+        }
+
+    thread = threading.Thread(target=run_analysis_job, args=(job_id, request), daemon=True)
+    thread.start()
+
+    return {"status": "queued", "job_id": job_id}
+
+@app.get("/analyze/jobs/{job_id}", response_model=AnalysisJobStatus)
+async def get_analyze_job(job_id: str):
+    with analysis_jobs_lock:
+        job = analysis_jobs.get(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Analysis job not found")
+        return {
+            "status": job["status"],
+            "progress": job["progress"],
+            "step_id": job["step_id"],
+            "step_label": job["step_label"],
+            "message": job["message"],
+            "logs": job["logs"],
+            "project": job["project"],
+            "results": job["results"],
+            "error": job.get("error"),
+        }
+
+@app.post("/analyze")
+async def analyze(request: AnalysisRequest):
+    final_results = run_analysis(request)
+
     return {
         "status": "success",
         "project": request.project_name,
