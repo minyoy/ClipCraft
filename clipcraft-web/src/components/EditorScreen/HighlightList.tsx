@@ -7,7 +7,7 @@ function formatTime(seconds: number): string {
   return `${minutes}:${String(rest).padStart(2, '0')}`;
 }
 
-export default function HighlightList({ activeSegment, onSegmentClick, segments, thumbnails }: HighlightListProps) {
+export default function HighlightList({ activeSegment, onSegmentClick, segmentEditSettings, segments, thumbnails }: HighlightListProps) {
   return (
     <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-5 py-4">
       {segments.map((segment, index) => {
@@ -17,6 +17,8 @@ export default function HighlightList({ activeSegment, onSegmentClick, segments,
         const border = borders[index % borders.length];
         const isActive = activeSegment === index;
         const segmentTime = `${formatTime(segment.start)} - ${formatTime(segment.end)}`;
+        const editSetting = segmentEditSettings.find((setting) => setting.segmentId === segment.id);
+        const hasEditBadge = Boolean(editSetting && (editSetting.speed !== 1 || editSetting.muted));
 
         return (
           <div
@@ -39,18 +41,28 @@ export default function HighlightList({ activeSegment, onSegmentClick, segments,
               {thumbnails[segment.id] ? (
                 <img className="absolute inset-0 h-full w-full object-cover" src={thumbnails[segment.id]} alt="" />
               ) : (
-                <span className="font-mono text-[7px] text-white/20 uppercase">clip</span>
+                <span className="font-mono text-[7px] text-white/20">클립</span>
               )}
               <div className="absolute top-0 bottom-0 left-0 w-[3px]" style={{ background: border }} />
             </div>
             <div className="flex-1 px-3.5 py-2.5" style={{ background: tint }}>
               <div className="mb-1 flex items-center gap-[7px]">
                 <span className="flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full font-mono text-[8px] font-bold text-white" style={{ background: border }}>
-                  {segment.id}
+                  {index + 1}
                 </span>
                 <span className="text-[13px] font-[480] tracking-[-0.1px]">{segment.scenario}</span>
               </div>
-              <span className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{segmentTime}</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{segmentTime}</span>
+                {hasEditBadge && editSetting?.speed !== 1 && (
+                  <span className="rounded-full px-1.5 py-[1px] font-mono text-[9px] font-semibold" style={{ background: `${border}18`, color: border }}>
+                    {editSetting?.speed}배속
+                  </span>
+                )}
+                {hasEditBadge && editSetting?.muted && (
+                  <span className="rounded-full bg-black/8 px-1.5 py-[1px] font-mono text-[9px] font-semibold text-black/55">음소거</span>
+                )}
+              </div>
             </div>
           </div>
         );

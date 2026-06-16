@@ -2,6 +2,7 @@ import type { PendingHighlightAnalysis } from '../app';
 
 export interface UploadScreenProps {
   onNext: (request: PendingHighlightAnalysis) => void;
+  onLogoClick: () => void;
 }
 
 export type UploadStatus = 'idle' | 'loading' | 'success';

@@ -18,7 +18,7 @@ interface NewProjectModalProps {
 const formats = [
   { v: '16:9', label: '가로 (16:9)', sub: 'YouTube · TV' },
   { v: '9:16', label: '세로 (9:16)', sub: 'Shorts · Reels' },
-  { v: '1:1', label: '정사각 (1:1)', sub: 'Instagram' },
+  { v: '1:1', label: '정사각형 (1:1)', sub: 'Instagram' },
 ];
 
 export default function NewProjectModal({ onCancel, onCreate }: NewProjectModalProps) {
@@ -73,7 +73,7 @@ export default function NewProjectModal({ onCancel, onCreate }: NewProjectModalP
               const active = format === item.v;
               return (
                 <button
-                  className="flex-1 cursor-pointer rounded-[10px] border-[1.5px] px-2.5 py-3 text-center transition-all"
+                  className="min-h-[118px] flex-1 cursor-pointer rounded-[10px] border-[1.5px] px-2.5 py-5 text-center transition-all"
                   key={item.v}
                   onClick={() => setFormat(item.v)}
                   style={{
@@ -82,12 +82,12 @@ export default function NewProjectModal({ onCancel, onCreate }: NewProjectModalP
                   }}
                   type="button"
                 >
-                  <div className="mb-1.5 flex justify-center">
+                  <div className="mb-3 flex justify-center">
                     <div
                       className="rounded-[3px] border-[1.5px]"
                       style={{
-                        width: item.v === '16:9' ? 28 : item.v === '9:16' ? 14 : 20,
-                        height: item.v === '16:9' ? 16 : item.v === '9:16' ? 24 : 20,
+                        width: item.v === '16:9' ? 34 : item.v === '9:16' ? 18 : 26,
+                        height: item.v === '16:9' ? 20 : item.v === '9:16' ? 34 : 26,
                         borderColor: active ? accent : 'rgba(0,0,0,0.3)',
                       }}
                     />

@@ -23,6 +23,19 @@ export interface EditorHighlightSegment extends HighlightSegment {
   sourceId: number;
 }
 
+export interface SegmentEditSetting {
+  segmentId: number;
+  speed: number;
+  muted: boolean;
+}
+
+export interface EditChatMessage {
+  id: number;
+  role: 'user' | 'system';
+  content: string;
+  createdAt: string;
+}
+
 export interface HighlightAnalysisData {
   segments: EditorHighlightSegment[];
   duration: number;

@@ -9,6 +9,7 @@ export interface ProjectItem {
   format: string;
   id: string;
   palette: [string, string, string];
+  previewImage?: string;
   progress?: number;
   scenes: number;
   sizeMB: number;

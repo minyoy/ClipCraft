@@ -12,10 +12,10 @@ export default function ChatMessage({ accent, message }: ChatMessageProps) {
         className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[9px] font-semibold"
         style={{ background: isUser ? 'rgba(0,0,0,0.07)' : accent }}
       >
-        {isUser ? 'Y' : <Icon d={icons.bot} size={11} stroke="#fff" />}
+        {isUser ? '나' : <Icon d={icons.bot} size={11} stroke="#fff" />}
       </div>
       <div className="flex-1">
-        <div className={cn('text-[10px] font-[480] text-[rgba(0,0,0,0.32)]', isUser ? 'mb-[3px]' : 'mb-1')}>{isUser ? 'You' : 'Assistant'}</div>
+        <div className={cn('text-[10px] font-[480] text-[rgba(0,0,0,0.32)]', isUser ? 'mb-[3px]' : 'mb-1')}>{isUser ? '나' : '어시스턴트'}</div>
         {isUser ? (
           <div className="text-[12.5px] leading-[1.5] tracking-[-0.1px]">{message.text}</div>
         ) : (

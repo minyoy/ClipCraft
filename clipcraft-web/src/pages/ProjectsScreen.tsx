@@ -9,21 +9,24 @@ import ProjectRow, { ProjectListHeader } from '../components/ProjectsScreen/Proj
 import ProjectsPageHeader from '../components/ProjectsScreen/ProjectsPageHeader';
 import ProjectsToolbar from '../components/ProjectsScreen/ProjectsToolbar';
 import ProjectsTopNav from '../components/ProjectsScreen/ProjectsTopNav';
+import RenameProjectModal from '../components/ProjectsScreen/RenameProjectModal';
 import Toast from '../components/ProjectsScreen/Toast';
 import { initialProjects, projectPalettes } from '../components/ProjectsScreen/projectData';
 import type { ProjectFilter, ProjectItem, ProjectSort, ProjectsView, ToastState } from '../types/pages/ProjectsScreen';
 
 interface ProjectsScreenProps {
+  onLogoClick: () => void;
   onStartNewProject: () => void;
 }
 
-export default function ProjectsScreen({ onStartNewProject }: ProjectsScreenProps) {
+export default function ProjectsScreen({ onLogoClick, onStartNewProject }: ProjectsScreenProps) {
   const [projects, setProjects] = useState<ProjectItem[]>(initialProjects);
   const [view, setView] = useState<ProjectsView>('grid');
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<ProjectFilter>('all');
   const [sort, setSort] = useState<ProjectSort>('updated');
   const [deleteTarget, setDeleteTarget] = useState<ProjectItem | null>(null);
+  const [renameTarget, setRenameTarget] = useState<ProjectItem | null>(null);
   const [newOpen, setNewOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const undoRef = useRef<{ index: number; project: ProjectItem } | null>(null);
@@ -120,11 +123,9 @@ export default function ProjectsScreen({ onStartNewProject }: ProjectsScreenProp
     setProjects((current) => current.map((item) => (item.id === project.id ? { ...item, starred: !item.starred } : item)));
   };
 
-  const renameProject = (project: ProjectItem) => {
-    const nextName = window.prompt('새 이름', project.title);
-    if (!nextName?.trim() || nextName.trim() === project.title) return;
-
-    setProjects((current) => current.map((item) => (item.id === project.id ? { ...item, title: nextName.trim(), updated: '방금 전' } : item)));
+  const renameProject = (project: ProjectItem, title: string) => {
+    setProjects((current) => current.map((item) => (item.id === project.id ? { ...item, title, updated: '방금 전' } : item)));
+    setRenameTarget(null);
     setToast({ icon: 'check', message: '이름이 변경되었어요' });
   };
 
@@ -152,17 +153,17 @@ export default function ProjectsScreen({ onStartNewProject }: ProjectsScreenProp
     onDelete: setDeleteTarget,
     onDuplicate: duplicateProject,
     onOpen: openProject,
-    onRename: renameProject,
+    onRename: setRenameTarget,
     onToggleStar: toggleStar,
   };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fafafa]">
-      <ProjectsTopNav />
+      <ProjectsTopNav onLogoClick={onLogoClick} />
       <main className="mx-auto w-full max-w-[1440px] flex-1 px-10 pt-9 pb-20 max-[760px]:px-5">
         <ProjectsPageHeader count={projects.length} onNewProject={() => setNewOpen(true)} />
         <ProjectsToolbar onQueryChange={setQuery} onSortChange={setSort} onViewChange={setView} query={query} sort={sort} view={view} />
-        <ProjectFilterTabs activeFilter={activeFilter} onChange={setActiveFilter} tabs={filterTabs} />
+        {/* <ProjectFilterTabs activeFilter={activeFilter} onChange={setActiveFilter} tabs={filterTabs} /> */}
 
         {filteredProjects.length === 0 && query ? (
           <EmptySearchState onClear={() => setQuery('')} query={query} />
@@ -184,6 +185,7 @@ export default function ProjectsScreen({ onStartNewProject }: ProjectsScreenProp
       </main>
 
       {deleteTarget && <DeleteProjectModal onCancel={() => setDeleteTarget(null)} onConfirm={deleteProject} project={deleteTarget} />}
+      {renameTarget && <RenameProjectModal onCancel={() => setRenameTarget(null)} onRename={renameProject} project={renameTarget} />}
       {newOpen && <NewProjectModal onCancel={() => setNewOpen(false)} onCreate={createProject} />}
       <Toast onDismiss={() => setToast(null)} toast={toast} />
     </div>

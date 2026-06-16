@@ -27,6 +27,48 @@ export const fadeInUp: Variants = {
   },
 };
 
+export const landingInnerStagger: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.16,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+export const landingItemRise: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 34,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.95,
+      ease: easeOutExpo,
+    },
+  },
+};
+
+export const landingVisualRise: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 52,
+    scale: 0.985,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 1.08,
+      ease: easeOutExpo,
+    },
+  },
+};
+
 export const pageTransition: Variants = {
   hidden: {
     opacity: 0,

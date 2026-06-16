@@ -11,6 +11,7 @@
 
   html,
   body {
+    margin: 0;
     background: #fff;
     font-family: 'DM Sans', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
   }
@@ -73,5 +74,16 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes caretBlink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  46%,
+  100% {
+    opacity: 0;
   }
 }

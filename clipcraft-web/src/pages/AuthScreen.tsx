@@ -8,9 +8,10 @@ type AuthMode = 'login' | 'signup';
 
 interface AuthScreenProps {
   onContinue: () => void;
+  onLogoClick: () => void;
 }
 
-export default function AuthScreen({ onContinue }: AuthScreenProps) {
+export default function AuthScreen({ onContinue, onLogoClick }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [success, setSuccess] = useState<AuthMode | null>(null);
 
@@ -20,11 +21,11 @@ export default function AuthScreen({ onContinue }: AuthScreenProps) {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout onLogoClick={onLogoClick}>
       {success ? (
         <AuthSuccessState mode={success} onContinue={onContinue} />
       ) : mode === 'login' ? (
-        <LoginForm onSubmit={() => setSuccess('login')} onSwitch={switchMode} />
+        <LoginForm onSubmit={onContinue} onSwitch={switchMode} />
       ) : (
         <SignupForm onSubmit={() => setSuccess('signup')} onSwitch={switchMode} />
       )}

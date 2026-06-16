@@ -13,7 +13,7 @@ import { captureVideoThumbnail, formatDuration, formatFileSize, isVideoFile, loa
 import type { ScenarioItem } from '../types/app';
 import type { UploadedVideo, UploadScreenProps, UploadStatus } from '../types/pages/UploadScreen';
 
-export default function UploadFlow({ onNext }: UploadScreenProps) {
+export default function UploadFlow({ onLogoClick, onNext }: UploadScreenProps) {
   const { accent, density } = useTheme();
   const fileInputId = useId();
   const shouldReduceMotion = useReducedMotion();
@@ -135,7 +135,7 @@ export default function UploadFlow({ onNext }: UploadScreenProps) {
       initial={shouldReduceMotion ? false : 'hidden'}
       animate={shouldReduceMotion ? undefined : 'visible'}
     >
-      <UploadHeader useEmptyStateDesign={useEmptyStateDesign} />
+      <UploadHeader onLogoClick={onLogoClick} useEmptyStateDesign={useEmptyStateDesign} />
 
       <motion.div className="mb-10 flex w-full flex-col gap-2.5 will-change-[transform,opacity]" variants={fadeInUp}>
         <MonoLabel className="text-[15px] font-[500] tracking-[0.5px]">프로젝트 이름</MonoLabel>

@@ -20,9 +20,15 @@ export default function ProjectThumbnail({ project, ratio = '16 / 9' }: ProjectT
         backgroundImage: `repeating-linear-gradient(${stripeAngle}deg, ${a} 0px, ${a} 14px, ${b} 14px, ${b} 28px)`,
       }}
     >
-      <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 60% 40%, transparent 30%, ${a}88 100%)` }} />
+      {project.previewImage ? (
+        <>
+          <img className="absolute inset-0 h-full w-full object-cover" src={project.previewImage} alt="" />
+          <div className="absolute inset-0 bg-black/[0.08]" />
+        </>
+      ) : (
+        <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 60% 40%, transparent 30%, ${a}88 100%)` }} />
+      )}
       <div className="absolute top-2.5 right-2.5 left-2.5 flex items-start justify-between gap-2">
-        <span className="font-mono text-[9px] tracking-[1px] text-[rgba(255,255,255,0.55)] uppercase">video preview</span>
         {project.starred && <Icon d={icons.star} fill="#fff" size={12} stroke="#fff" strokeWidth={1} />}
       </div>
 

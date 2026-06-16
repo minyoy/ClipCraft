@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { requestAnalyze } from '../api/analyze';
+import { getAnalyzeJob, normalizeAnalyzeResponse, startAnalyzeJob } from '../api/analyze';
 import { useTheme } from '../App';
 import Logo from '../components/Logo';
 import MonoLabel from '../components/MonoLabel';
@@ -7,7 +7,7 @@ import PillButton from '../components/PillButton';
 import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
 
 const ANALYSIS_STEPS = [
-  { id: 0, label: '영상 파일 수신 중', sub: 'GPU 서버로 전송하는 중...', duration: 1800 },
+  { id: 0, label: '영상 파일 수신 중', sub: '분석 요청을 준비하는 중...', duration: 1800 },
   { id: 1, label: '프레임 디코딩', sub: 'H.264 디코더 초기화 완료', duration: 2200 },
   { id: 2, label: '씬 경계 감지', sub: 'Shot boundary detection 실행 중...', duration: 2800 },
   { id: 3, label: '오디오 파형 분석', sub: '무음 구간 및 음성 타임라인 추출 중...', duration: 2000 },
@@ -15,10 +15,44 @@ const ANALYSIS_STEPS = [
   { id: 5, label: '하이라이트 구간 확정', sub: '편집 타임라인 생성 완료', duration: 1400 },
 ];
 
+const analyzeJobIdsByRequest = new Map<string, string>();
+const analyzeJobStartPromisesByRequest = new Map<string, Promise<string>>();
+
 interface AnalyzingScreenProps {
   request: PendingHighlightAnalysis;
   onDone: (result: HighlightAnalysisResult) => void;
   onBack: () => void;
+}
+
+function getAnalyzeRequestKey(request: PendingHighlightAnalysis): string {
+  return JSON.stringify({
+    fileName: request.file.name,
+    fileSize: request.file.size,
+    fileLastModified: request.file.lastModified,
+    projectName: request.projectName,
+    scenarios: request.scenarios.map((scenario) => scenario.ko),
+  });
+}
+
+function getOrStartAnalyzeJob(requestKey: string, request: PendingHighlightAnalysis): Promise<string> {
+  const cachedJobId = analyzeJobIdsByRequest.get(requestKey);
+  if (cachedJobId) return Promise.resolve(cachedJobId);
+
+  const cachedStartPromise = analyzeJobStartPromisesByRequest.get(requestKey);
+  if (cachedStartPromise) return cachedStartPromise;
+
+  const startPromise = startAnalyzeJob(request.file, request.scenarios, request.projectName)
+    .then((job) => {
+      analyzeJobIdsByRequest.set(requestKey, job.job_id);
+      return job.job_id;
+    })
+    .catch((error) => {
+      analyzeJobStartPromisesByRequest.delete(requestKey);
+      throw error;
+    });
+
+  analyzeJobStartPromisesByRequest.set(requestKey, startPromise);
+  return startPromise;
 }
 
 export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingScreenProps) {
@@ -28,86 +62,90 @@ export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingSc
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logLines, setLogLines] = useState<string[]>([]);
+  const [statusMessage, setStatusMessage] = useState(ANALYSIS_STEPS[0].sub);
   const logRef = useRef<HTMLDivElement>(null);
+  const jobIdRef = useRef<string | null>(null);
+  const requestKeyRef = useRef(getAnalyzeRequestKey(request));
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
-  const totalDuration = ANALYSIS_STEPS.reduce((s, t) => s + t.duration, 0);
-
   useEffect(() => {
     let cancelled = false;
-    let timer: number | undefined;
+    let pollTimer: number | undefined;
+    let doneTimer: number | undefined;
+    const apiStart = performance.now();
+    const requestKey = requestKeyRef.current;
 
-    const startTimeout = window.setTimeout(() => {
-      if (cancelled) return;
-
-      let elapsed = 0;
-      let currentStep = 0;
-      let stepElapsed = 0;
-      const interval = 40;
-
-      timer = window.setInterval(() => {
-        elapsed += interval;
-        stepElapsed += interval;
-
-        const step = ANALYSIS_STEPS[currentStep];
-        const pct = Math.min(1, stepElapsed / step.duration);
-        setProgress(Math.min(95, Math.round((elapsed / totalDuration) * 100)));
-
-        if (pct >= 1) {
-          setLogLines((prev) => [...prev, `✓  ${step.label}`]);
-          if (currentStep < ANALYSIS_STEPS.length - 1) {
-            currentStep++;
-            stepElapsed = 0;
-            setStepIdx(currentStep);
-          } else {
-            window.clearInterval(timer);
-            setProgress(95);
-          }
-        }
-      }, interval);
-
-      const apiStart = performance.now();
-      requestAnalyze(request.file, request.scenarios, request.projectName)
-        .then((analysis) => {
+    const pollJob = (jobId: string) => {
+      getAnalyzeJob(jobId)
+        .then((job) => {
           if (cancelled) return;
-          console.log(`[ClipCraft] API 응답 시간: ${((performance.now() - apiStart) / 1000).toFixed(2)}s`);
 
-          if (timer !== undefined) window.clearInterval(timer);
-          setLogLines((prev) => {
-            const completed = new Set(prev.map((line) => line.replace(/^✓\s+/, '')));
-            const remaining = ANALYSIS_STEPS.filter((step) => !completed.has(step.label)).map((step) => `✓  ${step.label}`);
-            return [...prev, ...remaining];
-          });
-          setProgress(100);
-          setDone(true);
+          setProgress(Math.min(100, Math.max(0, job.progress)));
+          setStepIdx(Math.min(ANALYSIS_STEPS.length - 1, Math.max(0, job.step_id)));
+          setStatusMessage(job.message || job.step_label || ANALYSIS_STEPS[job.step_id]?.sub || ANALYSIS_STEPS[0].sub);
+          setLogLines(job.logs ?? []);
 
-          window.setTimeout(() => {
-            if (!cancelled) {
-              onDoneRef.current({
-                ...analysis,
-                projectName: analysis.projectName,
-                videoUrl: request.videoUrl,
-                videoName: request.videoName,
-              });
-            }
-          }, 700);
+          if (job.status === 'success') {
+            console.log(`[ClipCraft] API 응답 시간: ${((performance.now() - apiStart) / 1000).toFixed(2)}s`);
+            setProgress(100);
+            setStepIdx(ANALYSIS_STEPS.length - 1);
+            setDone(true);
+
+            doneTimer = window.setTimeout(() => {
+              if (!cancelled) {
+                onDoneRef.current({
+                  ...normalizeAnalyzeResponse(job.results),
+                  projectName: job.project,
+                  videoUrl: request.videoUrl,
+                  videoName: request.videoName,
+                });
+              }
+            }, 700);
+            return;
+          }
+
+          if (job.status === 'error') {
+            setError(job.error || job.message || '분석 요청에 실패했습니다. API 주소와 서버 상태를 확인해 주세요.');
+            return;
+          }
+
+          pollTimer = window.setTimeout(() => pollJob(jobId), 900);
         })
         .catch(() => {
           if (cancelled) return;
-          console.log(`[ClipCraft] API 응답 시간 (실패): ${((performance.now() - apiStart) / 1000).toFixed(2)}s`);
-
-          if (timer !== undefined) window.clearInterval(timer);
-          setError('분석 요청에 실패했습니다. API 주소와 서버 상태를 확인해 주세요.');
+          setError('분석 상태를 가져오지 못했습니다. API 주소와 서버 상태를 확인해 주세요.');
         });
-    }, 0);
+    };
+
+    const startJob = async () => {
+      try {
+        const existingJobId = jobIdRef.current;
+        if (existingJobId) {
+          pollJob(existingJobId);
+          return;
+        }
+
+        const jobId = await getOrStartAnalyzeJob(requestKey, request);
+        if (cancelled) return;
+
+        jobIdRef.current = jobId;
+        pollJob(jobId);
+      } catch {
+        if (!cancelled) {
+          setError('분석 요청에 실패했습니다. API 주소와 서버 상태를 확인해 주세요.');
+        }
+      }
+    };
+
+    void startJob();
 
     return () => {
       cancelled = true;
-      window.clearTimeout(startTimeout);
-      if (timer !== undefined) window.clearInterval(timer);
+      if (pollTimer !== undefined) window.clearTimeout(pollTimer);
+      if (doneTimer !== undefined) window.clearTimeout(doneTimer);
     };
-  }, [request.file, request.projectName, request.scenarios, request.videoName, request.videoUrl, totalDuration]);
+  }, [request.file, request.projectName, request.scenarios, request.videoName, request.videoUrl]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -173,7 +211,7 @@ export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingSc
           </div>
 
           <div className="text-center">
-            <MonoLabel className="mb-2 block">GPU Server · Analyzing</MonoLabel>
+            <MonoLabel className="mb-2 block">Backend · Analyzing</MonoLabel>
             <h2 className="mb-1.5 text-[28px] font-[620] leading-[1.15] tracking-[-0.8px]">
               {done ? '분석 완료!' : '영상을 분석하고 있어요'}
             </h2>
@@ -182,7 +220,7 @@ export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingSc
                 ? error
                 : done
                 ? '편집 화면으로 이동합니다...'
-                : 'GPU 서버에서 영상과 시나리오를 처리 중입니다.\n잠시만 기다려 주세요.'}
+                : '백엔드에서 영상과 시나리오를 처리 중입니다.\n잠시만 기다려 주세요.'}
             </p>
           </div>
         </div>
@@ -204,10 +242,20 @@ export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingSc
           </div>
           {!done && (
             <span className="font-mono text-[11.5px] tracking-[0.1px] text-[rgba(0,0,0,0.3)]">
-              {error || currentStep.sub}
+              {error || statusMessage}
             </span>
           )}
         </div>
+
+        {logLines.length > 0 && (
+          <div ref={logRef} className="max-h-[132px] w-full overflow-y-auto rounded-[8px] border border-black/8 bg-white px-3 py-2 text-left">
+            {logLines.map((line, index) => (
+              <div key={`${line}-${index}`} className="font-mono text-[11px] leading-[1.8] text-black/45">
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
 
         {error && (
           <PillButton variant="white" onClick={onBack} className="px-6 py-3 text-sm font-semibold">

@@ -5,17 +5,20 @@ import { containerStagger, fadeInUp } from '../../lib/animations';
 import { cn } from '../../lib/cn';
 
 interface UploadHeaderProps {
+  onLogoClick: () => void;
   useEmptyStateDesign: boolean;
 }
 
-export default function UploadHeader({ useEmptyStateDesign }: UploadHeaderProps) {
+export default function UploadHeader({ onLogoClick, useEmptyStateDesign }: UploadHeaderProps) {
   return (
     <>
       <motion.div
         className={cn('flex w-full items-center will-change-[transform,opacity]', useEmptyStateDesign ? 'mb-10' : 'mb-8')}
         variants={fadeInUp}
       >
-        <Logo height={40} />
+        <button className="cursor-pointer border-0 bg-transparent p-0" onClick={onLogoClick} type="button" aria-label="랜딩 화면으로 이동">
+          <Logo height={40} />
+        </button>
       </motion.div>
 
       <motion.div className="text-center mb-10" variants={containerStagger}>

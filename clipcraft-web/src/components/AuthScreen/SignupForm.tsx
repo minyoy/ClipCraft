@@ -6,7 +6,6 @@ import PillButton from '../PillButton';
 import { icons } from '../icons';
 import AuthCheckbox from './AuthCheckbox';
 import AuthField from './AuthField';
-import SocialButton from './SocialButton';
 import StrengthMeter from './StrengthMeter';
 
 interface SignupFormProps {
@@ -53,58 +52,46 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
   };
 
   return (
-    <form className="flex animate-[fadeIn_0.3s_ease] flex-col gap-4" onSubmit={submit}>
+    <form className="flex animate-[fadeIn_0.3s_ease] flex-col gap-5" onSubmit={submit}>
       <div>
-        <MonoLabel className="mb-3 block">Create account · 시작하기</MonoLabel>
+        <MonoLabel className="mb-3 block text-black/40">Sign up</MonoLabel>
         <h2 className="mb-1.5 text-[32px] leading-[1.15] font-[620] tracking-[-0.9px]">
           AI 영상 편집을
           <br />
           더 빠르게 시작하세요
         </h2>
-        <p className="text-sm leading-[1.55] tracking-[-0.15px] text-[rgba(0,0,0,0.5)]">
+        <p className="text-sm leading-[1.55] tracking-[-0.15px] text-black/50">
           원하는 장면을 말로 찾고, 편집 시간을 줄여보세요.
         </p>
       </div>
 
-      <div className="flex flex-col gap-2.5">
-        <SocialButton kind="google" />
-        <SocialButton kind="kakao" />
-        <SocialButton kind="apple" />
-      </div>
-
-      <div className="my-0.5 flex items-center gap-3">
-        <div className="h-px flex-1 bg-[rgba(0,0,0,0.08)]" />
-        <MonoLabel className="text-[10px]">또는 이메일로</MonoLabel>
-        <div className="h-px flex-1 bg-[rgba(0,0,0,0.08)]" />
-      </div>
-
-      <AuthField
-        autoComplete="name"
-        autoFocus
-        error={errors.name}
-        icon="user"
-        label="이름"
-        onChange={(value) => {
-          setName(value);
-          if (errors.name) setErrors((current) => ({ ...current, name: null }));
-        }}
-        placeholder="홍길동"
-        value={name}
-      />
-      <AuthField
-        autoComplete="email"
-        error={errors.email}
-        icon="mail"
-        label="이메일"
-        onChange={(value) => {
-          setEmail(value);
-          if (errors.email) setErrors((current) => ({ ...current, email: null }));
-        }}
-        placeholder="you@example.com"
-        type="email"
-        value={email}
-      />
-      <div className="flex flex-col gap-[7px]">
+      <div className="flex flex-col gap-4">
+        <AuthField
+          autoComplete="name"
+          autoFocus
+          error={errors.name}
+          icon="user"
+          label="이름"
+          onChange={(value) => {
+            setName(value);
+            if (errors.name) setErrors((current) => ({ ...current, name: null }));
+          }}
+          placeholder="홍길동"
+          value={name}
+        />
+        <AuthField
+          autoComplete="email"
+          error={errors.email}
+          icon="mail"
+          label="이메일"
+          onChange={(value) => {
+            setEmail(value);
+            if (errors.email) setErrors((current) => ({ ...current, email: null }));
+          }}
+          placeholder="you@example.com"
+          type="email"
+          value={email}
+        />
         <AuthField
           autoComplete="new-password"
           error={errors.password}
@@ -122,13 +109,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
         <StrengthMeter password={password} />
       </div>
 
-      <div
-        className="flex flex-col gap-2.5 rounded-xl px-4 py-3.5"
-        style={{
-          background: 'rgba(0,0,0,0.025)',
-          border: errors.agree ? '1.5px solid #dc2626' : '1px solid rgba(0,0,0,0.06)',
-        }}
-      >
+      <div className="flex flex-col gap-2.5">
         <AuthCheckbox
           checked={agree}
           label={
@@ -143,18 +124,17 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
             setAgree(checked);
             if (errors.agree) setErrors((current) => ({ ...current, agree: null }));
           }}
-          rightSlot={
-            <button className="border-0 bg-transparent text-[11.5px] text-[rgba(0,0,0,0.4)] underline underline-offset-2" type="button">
-              보기
-            </button>
-          }
+          // rightSlot={
+          //   <button className="border-0 bg-transparent text-[11.5px] text-[rgba(0,0,0,0.4)] underline underline-offset-2" type="button">
+          //     보기
+          //   </button>
+          // }
         />
-        <div className="h-px bg-[rgba(0,0,0,0.06)]" />
         <AuthCheckbox
           checked={agreeMarketing}
           label={
             <>
-              <span className="font-[480] text-[rgba(0,0,0,0.4)]">[선택]</span> 마케팅 정보 수신 (이메일, 푸시)
+              <span className="font-[480] text-[rgba(0,0,0,0.4)]">[선택]</span> 마케팅 정보 수신 (이메일)
             </>
           }
           onChange={setAgreeMarketing}
@@ -167,14 +147,14 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
         </div>
       )}
 
-      <PillButton fullWidth iconRight="arrowR" loading={loading} type="submit" variant="accent">
+      <PillButton fullWidth loading={loading} type="submit" variant="accent">
         {loading ? '계정 만드는 중...' : '시작하기'}
       </PillButton>
 
-      <p className="text-center text-[13.5px] tracking-[-0.1px] text-[rgba(0,0,0,0.5)]">
-        이미 계정이 있으신가요?{' '}
-        <button className="cursor-pointer border-0 bg-transparent p-0 text-[13.5px] font-[540] tracking-[-0.1px]" onClick={onSwitch} style={{ color: accent }} type="button">
-          로그인 →
+      <p className="text-center text-[13.5px] tracking-[-0.1px] text-black/50">
+        이미 계정이 있으신가요?{'   '}
+        <button className="cursor-pointer border-0 bg-transparent p-0 text-[13.5px] font-[540] tracking-[-0.1px] transition hover:opacity-75" onClick={onSwitch} style={{ color: accent }} type="button">
+          로그인
         </button>
       </p>
     </form>

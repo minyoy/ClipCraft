@@ -1,6 +1,6 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react';
 import type { IconName } from '../../components/icons';
-import type { ChatMessage as AppChatMessage, EditorHighlightSegment, HighlightAnalysisData } from '../app';
+import type { ChatMessage as AppChatMessage, EditorHighlightSegment, HighlightAnalysisData, SegmentEditSetting } from '../app';
 
 export interface EditorScreenProps {
   onBack: () => void;
@@ -39,6 +39,7 @@ export interface WaveformTimelineProps {
 export interface HighlightListProps {
   activeSegment: number | null;
   onSegmentClick: (index: number) => void;
+  segmentEditSettings: SegmentEditSetting[];
   segments: EditorHighlightSegment[];
   thumbnails: Record<number, string>;
 }
@@ -49,6 +50,15 @@ export interface AccentProps {
 
 export interface ChatMessageProps extends AccentProps {
   message: AppChatMessage;
+}
+
+export interface NaturalLanguageCommandResult {
+  message: string;
+  status: 'success' | 'error';
+}
+
+export interface AiAssistantProps extends AccentProps {
+  onApplyCommand: (command: string) => NaturalLanguageCommandResult;
 }
 
 export interface RoundIconButtonProps {

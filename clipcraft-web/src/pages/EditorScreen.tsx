@@ -7,9 +7,10 @@ import HighlightList from '../components/EditorScreen/HighlightList';
 import PlayerControls, { getScrubPosition } from '../components/EditorScreen/PlayerControls';
 import VideoPreview from '../components/EditorScreen/VideoPreview';
 import WaveformTimeline from '../components/EditorScreen/WaveformTimeline';
-import type { ExportState } from '../types/app';
-import type { EditorHighlightSegment } from '../types/app';
-import type { EditorScreenProps } from '../types/pages/EditorScreen';
+import { applyEditorNaturalLanguageCommand } from '../lib/editorNaturalLanguageCommands';
+import { loadDeletedSegmentIds, loadSegmentEditSettings, saveDeletedSegmentIds, saveSegmentEditSettings } from '../lib/editorStorage';
+import type { EditorHighlightSegment, ExportState, SegmentEditSetting } from '../types/app';
+import type { EditorScreenProps, NaturalLanguageCommandResult } from '../types/pages/EditorScreen';
 
 const fallbackWaveHeights = Array.from(
   { length: 88 },
@@ -21,6 +22,17 @@ function amplitudesToWaveHeights(amplitudes: number[]): number[] {
 
   const maxAmplitude = Math.max(...amplitudes, 1);
   return amplitudes.map((amplitude) => 4 + (Math.max(0, amplitude) / maxAmplitude) * 28);
+}
+
+function filterDeletedSegments(segments: EditorHighlightSegment[], deletedSegmentIds: number[]): EditorHighlightSegment[] {
+  const deletedIds = new Set(deletedSegmentIds);
+  return segments.filter((segment) => !deletedIds.has(segment.id));
+}
+
+function filterStoredEditSettings(settings: SegmentEditSetting[], segments: EditorHighlightSegment[], deletedSegmentIds: number[]): SegmentEditSetting[] {
+  const segmentIds = new Set(segments.map((segment) => segment.id));
+  const deletedIds = new Set(deletedSegmentIds);
+  return settings.filter((setting) => segmentIds.has(setting.segmentId) && !deletedIds.has(setting.segmentId));
 }
 
 interface CapturedFrame {
@@ -46,10 +58,12 @@ function captureVideoFrame(videoUrl: string, time: number): Promise<CapturedFram
     const video = document.createElement('video');
     const canvas = document.createElement('canvas');
     let timeoutId: number | undefined;
+    let fallbackFrameId: number | undefined;
     let settled = false;
 
     const cleanup = () => {
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      if (fallbackFrameId !== undefined) window.clearTimeout(fallbackFrameId);
       video.removeAttribute('src');
       video.load();
     };
@@ -69,17 +83,19 @@ function captureVideoFrame(videoUrl: string, time: number): Promise<CapturedFram
 
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const brightness = getFrameBrightness(context, canvas.width, canvas.height);
+      const url = canvas.toDataURL('image/jpeg', 0.78);
       settled = true;
       cleanup();
       resolve({
         brightness,
-        url: canvas.toDataURL('image/jpeg', 0.78),
+        url,
       });
     };
 
     video.preload = 'auto';
     video.muted = true;
     video.playsInline = true;
+    video.crossOrigin = 'anonymous';
     video.onloadedmetadata = () => {
       const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : time;
       video.currentTime = Math.min(Math.max(0, time), Math.max(0, duration - 0.05));
@@ -87,10 +103,9 @@ function captureVideoFrame(videoUrl: string, time: number): Promise<CapturedFram
     video.onseeked = () => {
       if ('requestVideoFrameCallback' in video) {
         video.requestVideoFrameCallback(() => capture());
-        return;
       }
 
-      window.setTimeout(capture, 120);
+      fallbackFrameId = window.setTimeout(capture, 160);
     };
     video.onerror = () => {
       settled = true;
@@ -138,7 +153,8 @@ async function captureSegmentThumbnail(videoUrl: string, start: number, end: num
 
 export default function EditorWorkspace({ analysis, onBack, projectName, videoName, videoUrl }: EditorScreenProps) {
   const { accent } = useTheme();
-  const [segments, setSegments] = useState<EditorHighlightSegment[]>(analysis?.segments ?? []);
+  const [deletedSegmentIds, setDeletedSegmentIds] = useState<number[]>(loadDeletedSegmentIds);
+  const [segments, setSegments] = useState<EditorHighlightSegment[]>(() => filterDeletedSegments(analysis?.segments ?? [], loadDeletedSegmentIds()));
   const duration = analysis?.duration && analysis.duration > 0 ? analysis.duration : 15 * 60;
   const waveHeights = amplitudesToWaveHeights(analysis?.amplitudes ?? []);
   const [playing, setPlaying] = useState(false);
@@ -148,13 +164,27 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
   const [exportState, setExportState] = useState<ExportState>('idle');
   const [dragging, setDragging] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [segmentEditSettings, setSegmentEditSettings] = useState<SegmentEditSetting[]>(() =>
+    filterStoredEditSettings(loadSegmentEditSettings(), analysis?.segments ?? [], loadDeletedSegmentIds()),
+  );
   const [segmentThumbnails, setSegmentThumbnails] = useState<Record<number, string>>({});
   const scrubberRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    setSegments(analysis?.segments ?? []);
-  }, [analysis?.segments]);
+    const sourceSegments = analysis?.segments ?? [];
+
+    setSegments(filterDeletedSegments(sourceSegments, deletedSegmentIds));
+    setSegmentEditSettings((current) => filterStoredEditSettings(current, sourceSegments, deletedSegmentIds));
+  }, [analysis?.segments, deletedSegmentIds]);
+
+  useEffect(() => {
+    saveSegmentEditSettings(segmentEditSettings);
+  }, [segmentEditSettings]);
+
+  useEffect(() => {
+    saveDeletedSegmentIds(deletedSegmentIds);
+  }, [deletedSegmentIds]);
 
   useEffect(() => {
     if (!videoUrl || segments.length === 0) {
@@ -246,11 +276,18 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
     };
   }, [dragging]);
 
-  const onSegmentClick = (index: number) => {
-    const target = segments[index]?.start ?? 0;
+  const seekToSegment = (segment: EditorHighlightSegment, index: number) => {
+    const target = segment.start;
     setActiveSegment(index);
     setProgress(Math.min(1, Math.max(0, target / playbackDuration)));
     setPlaying(false);
+  };
+
+  const onSegmentClick = (index: number) => {
+    const segment = segments[index];
+    if (!segment) return;
+
+    seekToSegment(segment, index);
   };
 
   const onSegmentChange = (segmentId: number, edge: 'start' | 'end', time: number) => {
@@ -312,20 +349,37 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
     window.setTimeout(() => setExportState('idle'), 4000);
   };
 
+  const applyNaturalLanguageCommand = (command: string): NaturalLanguageCommandResult => {
+    return applyEditorNaturalLanguageCommand({
+      activeSegment,
+      command,
+      playbackDuration,
+      progress,
+      seekToSegment,
+      segments,
+      setActiveSegment,
+      setDeletedSegmentIds,
+      setPlaying,
+      setProgress,
+      setSegmentEditSettings,
+      setSegments,
+    });
+  };
+
   return (
-    <div className="editor-shell grid h-screen w-full grid-cols-2 grid-rows-[52px_1fr] overflow-hidden bg-white max-[900px]:h-auto max-[900px]:min-h-screen max-[900px]:grid-cols-1 max-[900px]:grid-rows-[52px_minmax(520px,1fr)_auto] max-[900px]:overflow-visible">
+    <div className="editor-shell grid h-screen w-full grid-cols-[minmax(360px,1fr)_minmax(360px,1fr)_320px] grid-rows-[52px_minmax(0,1fr)] overflow-hidden bg-white max-[1180px]:h-auto max-[1180px]:min-h-screen max-[1180px]:grid-cols-1 max-[1180px]:grid-rows-[52px_minmax(520px,70vh)_auto_minmax(360px,auto)] max-[1180px]:overflow-visible">
       <header className="col-[1/-1] flex items-center gap-3.5 border-b border-[rgba(0,0,0,0.08)] px-5">
         <button className="cursor-pointer border-0 bg-transparent p-0" onClick={onBack} type="button" aria-label="업로드 화면으로 돌아가기">
           <Logo height={26} />
         </button>
         <div className="h-4 w-px bg-[rgba(0,0,0,0.1)]" />
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] text-[rgba(0,0,0,0.4)]">Project:</span>
-          <span className="text-[13px] font-[480] tracking-[-0.1px]">{projectName ?? videoName ?? 'Highlight Edit'}</span>
+          <span className="text-[13px] text-[rgba(0,0,0,0.4)]">프로젝트:</span>
+          <span className="text-[13px] font-[480] tracking-[-0.1px]">{projectName ?? videoName ?? '하이라이트 편집'}</span>
         </div>
         <div className="flex-1" />
         <PillButton variant="white" icon="history" small>
-          History
+          작업 기록
         </PillButton>
         <PillButton
           variant="accent"
@@ -334,11 +388,11 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
           onClick={onExport}
           style={{ opacity: exportState === 'loading' ? 0.7 : 1, transition: 'all 0.3s' }}
         >
-          {exportState === 'loading' ? '내보내는 중...' : exportState === 'done' ? '완료!' : 'Final Export MP4'}
+          {exportState === 'loading' ? '내보내는 중...' : exportState === 'done' ? '완료!' : 'MP4로 내보내기'}
         </PillButton>
       </header>
 
-      <main className="flex flex-col overflow-hidden px-5 py-4">
+      <main className="flex min-h-0 flex-col overflow-hidden px-5 py-4">
         <VideoPreview
           videoRef={videoRef}
           videoUrl={videoUrl}
@@ -362,7 +416,7 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
         />
       </main>
 
-      <section className="flex flex-col overflow-hidden">
+      <section className="flex min-h-0 flex-col overflow-hidden">
         <WaveformTimeline
           accent={accent}
           duration={duration}
@@ -373,11 +427,16 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
           setProgress={setProgress}
           waveHeights={waveHeights}
         />
-        <HighlightList activeSegment={activeSegment} onSegmentClick={onSegmentClick} segments={segments} thumbnails={segmentThumbnails} />
+        <HighlightList
+          activeSegment={activeSegment}
+          onSegmentClick={onSegmentClick}
+          segmentEditSettings={segmentEditSettings}
+          segments={segments}
+          thumbnails={segmentThumbnails}
+        />
       </section>
 
-      {/* AI Assistant는 후순위 개발 영역이라 현재 화면에서는 비활성화합니다. */}
-      {/* <AiAssistant accent={accent} /> */}
+      <AiAssistant accent={accent} onApplyCommand={applyNaturalLanguageCommand} />
     </div>
   );
 }

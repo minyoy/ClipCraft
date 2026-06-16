@@ -15,7 +15,7 @@ interface ProjectsToolbarProps {
 export default function ProjectsToolbar({ onQueryChange, onSortChange, onViewChange, query, sort, view }: ProjectsToolbarProps) {
   return (
     <div className="mb-[18px] flex flex-wrap items-center gap-2.5 rounded-[14px] border border-[rgba(0,0,0,0.08)] bg-white px-3.5 py-2.5">
-      <div className="flex min-w-60 flex-1 items-center gap-2 rounded-lg border border-[rgba(0,0,0,0.08)] bg-white px-2.5 py-1.5">
+      <div className="flex min-w-60 flex-1 items-center gap-2 rounded-lg bg-white px-2.5 py-1.5">
         <Icon d={icons.search} size={14} stroke="rgba(0,0,0,0.4)" />
         <input
           className="flex-1 border-0 bg-transparent text-[13.5px] tracking-[-0.1px] outline-none placeholder:text-[rgba(0,0,0,0.35)]"

@@ -28,11 +28,11 @@ export default function VideoPreview({ onEnded, onLoadedMetadata, onTimeUpdate, 
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            <span className="font-mono text-[9px] tracking-[1px] text-[rgba(255,255,255,0.15)] uppercase">video preview</span>
+            <span className="font-mono text-[9px] tracking-[1px] text-[rgba(255,255,255,0.15)]">영상 미리보기</span>
           </div>
         )}
         <div className="pointer-events-none absolute right-0 bottom-2.5 left-0 text-center">
-          <span className="rounded bg-black/50 px-2 py-0.5 font-mono text-[9px] text-white/60">9:16 · Vertical / Shorts</span>
+          <span className="rounded bg-black/50 px-2 py-0.5 font-mono text-[9px] text-white/60">9:16 · 세로형 / 숏폼</span>
         </div>
       </div>
     </div>

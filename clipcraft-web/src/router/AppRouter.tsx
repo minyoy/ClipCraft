@@ -3,14 +3,16 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import AnalyzingScreen from '../pages/AnalyzingScreen';
 import AuthScreen from '../pages/AuthScreen';
 import EditorScreen from '../pages/EditorScreen';
+import LandingScreen from '../pages/LandingScreen';
 import ProjectsScreen from '../pages/ProjectsScreen';
 import UploadScreen from '../pages/UploadScreen';
 import { pageTransition } from '../lib/animations';
+import { mockEditorAnalysis } from '../mock/editorAnalysis';
 import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
 
 function UploadRoute() {
   const navigate = useNavigate();
-  return <UploadScreen onNext={(result) => navigate('/analyzing', { state: result })} />;
+  return <UploadScreen onLogoClick={() => navigate('/')} onNext={(result) => navigate('/analyzing', { state: result })} />;
 }
 
 function AnalyzingRoute() {
@@ -18,17 +20,18 @@ function AnalyzingRoute() {
   const navigate = useNavigate();
   const pendingAnalysis = location.state as PendingHighlightAnalysis | null;
 
-  if (!pendingAnalysis?.file || !pendingAnalysis.scenarios?.length) return <Navigate to="/" replace />;
+  if (!pendingAnalysis?.file || !pendingAnalysis.scenarios?.length) return <Navigate to="/upload" replace />;
 
-  return <AnalyzingScreen request={pendingAnalysis} onDone={(result) => navigate('/editor', { state: result })} onBack={() => navigate('/')} />;
+  return <AnalyzingScreen request={pendingAnalysis} onDone={(result) => navigate('/editor', { state: result })} onBack={() => navigate('/upload')} />;
 }
 
 function EditorRoute() {
   const location = useLocation();
   const navigate = useNavigate();
-  const analysisResult = location.state as HighlightAnalysisResult | null;
+  const routeState = location.state as HighlightAnalysisResult | null;
+  const analysisResult = routeState ?? mockEditorAnalysis;
 
-  if (!analysisResult?.segments?.length) return <Navigate to="/" replace />;
+    if (!analysisResult.segments?.length) return <Navigate to="/upload" replace />;
 
   return (
     <EditorScreen
@@ -36,19 +39,19 @@ function EditorRoute() {
       projectName={analysisResult.projectName}
       videoName={analysisResult.videoName}
       videoUrl={analysisResult.videoUrl}
-      onBack={() => navigate('/')}
+      onBack={() => navigate('/upload')}
     />
   );
 }
 
 function AuthRoute() {
   const navigate = useNavigate();
-  return <AuthScreen onContinue={() => navigate('/projects')} />;
+  return <AuthScreen onContinue={() => navigate('/projects')} onLogoClick={() => navigate('/')} />;
 }
 
 function ProjectsRoute() {
   const navigate = useNavigate();
-  return <ProjectsScreen onStartNewProject={() => navigate('/')} />;
+  return <ProjectsScreen onLogoClick={() => navigate('/')} onStartNewProject={() => navigate('/upload')} />;
 }
 
 export default function AppRouter() {
@@ -59,6 +62,20 @@ export default function AppRouter() {
       <Routes location={location} key={location.pathname}>
         <Route
           path="/"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <LandingScreen />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/upload"
           element={
             <motion.div className="min-h-screen" initial="hidden" animate="visible" exit="exit" variants={pageTransition}>
               <UploadRoute />
