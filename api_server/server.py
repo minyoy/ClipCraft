@@ -1,6 +1,11 @@
 import os
 import re
-import sys
+
+import sys 
+sys.path.insert(0, "/shareHost/jiyes/packages") #
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from vllava.vllava import VideoLLaVAVerifier #
+ 
 import threading
 import time
 import uuid
@@ -22,6 +27,7 @@ from audio.audio_waveform import extract_audio_waveform
 from pipeline import run_pipeline as run_clip_search_pipeline
 
 app = FastAPI()
+verifier = VideoLLaVAVerifier() #수정
 
 app.add_middleware(
     CORSMiddleware,
@@ -158,8 +164,17 @@ def run_analysis(request: AnalysisRequest, job_id: str | None = None):
 
         segments = pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result
 
-        if segments:
-            best = segments[0]
+
+        if segments: # 수정
+            vllava_result = verifier.verify_timestamp(
+                video_path=request.video_path,
+                scenario_text=query,
+                candidates=segments,
+            )
+            if isinstance(vllava_result, dict):
+                best = segments[vllava_result.get("best_idx", 0)]
+            else:
+                best = segments[0] #
 
             if job_id:
                 update_job(
@@ -214,6 +229,9 @@ def run_analysis_job(job_id: str, request: AnalysisRequest):
     try:
         run_analysis(request, job_id=job_id)
     except Exception as error:
+        print(f"❌ 에러 발생: {error}")
+        import traceback
+        traceback.print_exc()
         update_job(
             job_id,
             status="error",
