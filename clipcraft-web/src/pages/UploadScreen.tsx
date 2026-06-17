@@ -183,6 +183,7 @@ export default function UploadFlow({ initialProjectFormat, initialProjectName, o
             onClick={startHighlightAnalysis}
             icon="wand"
             disabled={!canStartEditing}
+            testId="analyze-start-button"
             className="px-10 py-3.5 [font-family:'Plus_Jakarta_Sans','Noto_Sans_KR',sans-serif] text-base font-bold tracking-[-0.3px]"
           >
             분석 시작하기

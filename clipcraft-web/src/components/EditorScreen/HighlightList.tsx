@@ -16,12 +16,14 @@ export default function HighlightList({ activeSegment, onSegmentClick, segmentEd
         const tint = tints[index % tints.length];
         const border = borders[index % borders.length];
         const isActive = activeSegment === index;
-        const segmentTime = `${formatTime(segment.start)} - ${formatTime(segment.end)}`;
         const editSetting = segmentEditSettings.find((setting) => setting.segmentId === segment.id);
         const hasEditBadge = Boolean(editSetting && (editSetting.speed !== 1 || editSetting.muted));
+        const scoreLabel = typeof segment.score === 'number' ? `${Math.round(segment.score * 100)}%` : null;
 
         return (
           <div
+            data-active={isActive ? 'true' : 'false'}
+            data-testid="result-card"
             key={`${segment.sourceId}-${segment.id}-${segment.scenario}-${segment.start}`}
             onClick={() => onSegmentClick(index)}
             onMouseEnter={(event) => {
@@ -50,17 +52,23 @@ export default function HighlightList({ activeSegment, onSegmentClick, segmentEd
                 <span className="flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full font-mono text-[8px] font-bold text-white" style={{ background: border }}>
                   {index + 1}
                 </span>
-                <span className="text-[13px] font-[480] tracking-[-0.1px]">{segment.scenario}</span>
+                <span className="text-[13px] font-[480] tracking-[-0.1px]">{segment.title ?? segment.scenario}</span>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{segmentTime}</span>
+                <button data-testid="segment-item" className="border-0 bg-transparent p-0 font-mono text-[11px] text-[rgba(0,0,0,0.38)]" type="button">
+                  {segment.scenario}
+                </button>
+                <span data-testid="result-start-time" className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{formatTime(segment.start)}</span>
+                <span className="font-mono text-[11px] text-[rgba(0,0,0,0.24)]">-</span>
+                <span data-testid="result-end-time" className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{formatTime(segment.end)}</span>
+                {scoreLabel && <span data-testid="result-score" className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">score {scoreLabel}</span>}
                 {hasEditBadge && editSetting?.speed !== 1 && (
-                  <span className="rounded-full px-1.5 py-[1px] font-mono text-[9px] font-semibold" style={{ background: `${border}18`, color: border }}>
+                  <span data-testid="playback-rate-indicator" className="rounded-full px-1.5 py-[1px] font-mono text-[9px] font-semibold" style={{ background: `${border}18`, color: border }}>
                     {editSetting?.speed}배속
                   </span>
                 )}
                 {hasEditBadge && editSetting?.muted && (
-                  <span className="rounded-full bg-black/8 px-1.5 py-[1px] font-mono text-[9px] font-semibold text-black/55">음소거</span>
+                  <span data-testid="mute-indicator" className="rounded-full bg-black/8 px-1.5 py-[1px] font-mono text-[9px] font-semibold text-black/55">음소거</span>
                 )}
               </div>
             </div>

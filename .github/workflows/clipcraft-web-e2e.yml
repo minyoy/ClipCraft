@@ -1,0 +1,39 @@
+name: ClipCraft Web E2E
+
+on:
+  push:
+    paths:
+      - 'clipcraft-web/**'
+      - '.github/workflows/clipcraft-web-e2e.yml'
+  pull_request:
+    paths:
+      - 'clipcraft-web/**'
+      - '.github/workflows/clipcraft-web-e2e.yml'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clipcraft-web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e

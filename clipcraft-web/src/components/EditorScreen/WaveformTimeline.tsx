@@ -95,6 +95,7 @@ export default function WaveformTimeline({ accent, duration, onSegmentChange, pr
             <button
               key={marker.id}
               aria-label={`${index + 1}번 ${marker.edge === 'start' ? '시작' : '끝'} 지점 조절`}
+              data-testid={marker.edge === 'start' ? 'segment-start-input' : 'segment-end-input'}
               className="absolute top-1/2 z-[4] flex h-[13px] w-[13px] cursor-ew-resize items-center justify-center rounded-full border-0 p-0 font-mono text-[6.5px] font-bold text-white transition-transform hover:scale-125"
               onMouseDown={(event) => startMarkerDrag(event, marker.segmentId, marker.edge)}
               style={{

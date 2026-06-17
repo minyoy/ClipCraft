@@ -166,25 +166,26 @@ export function applyEditorNaturalLanguageCommand({
   }
 
   const matchedSegments = findMatchingSegments(normalizedCommand, segments);
+  const targetSegments = matchedSegments.length > 0 ? matchedSegments : activeSegment !== null && segments[activeSegment] ? [segments[activeSegment]] : [];
 
-  if (matchedSegments.length === 0) {
+  if (targetSegments.length === 0) {
     return { status: 'error', message: '해당 장면을 찾지 못했어요.' };
   }
 
-  const targetLabel = getTargetLabel(matchedSegments);
+  const targetLabel = getTargetLabel(targetSegments);
 
   if (action.type === 'seek') {
-    const targetIndex = segments.findIndex((segment) => segment.id === matchedSegments[0].id);
-    if (targetIndex >= 0) seekToSegment(matchedSegments[0], targetIndex);
+    const targetIndex = segments.findIndex((segment) => segment.id === targetSegments[0].id);
+    if (targetIndex >= 0) seekToSegment(targetSegments[0], targetIndex);
 
     return { status: 'success', message: `“${targetLabel}”으로 이동했어요.` };
   }
 
   if (action.type === 'delete') {
-    const matchedIds = new Set(matchedSegments.map((segment) => segment.id));
+    const matchedIds = new Set(targetSegments.map((segment) => segment.id));
     const remainingSegments = segments.filter((segment) => !matchedIds.has(segment.id));
     const currentTime = progress * playbackDuration;
-    const isIndicatorInDeletedSegment = matchedSegments.some((segment) => currentTime >= segment.start && currentTime <= segment.end);
+    const isIndicatorInDeletedSegment = targetSegments.some((segment) => currentTime >= segment.start && currentTime <= segment.end);
     const activeSegmentId = activeSegment !== null ? segments[activeSegment]?.id : null;
     const isActiveSegmentDeleted = activeSegmentId !== null && matchedIds.has(activeSegmentId);
 
@@ -194,7 +195,7 @@ export function applyEditorNaturalLanguageCommand({
 
     if (isIndicatorInDeletedSegment || isActiveSegmentDeleted) {
       const fallbackSegment =
-        remainingSegments.find((segment) => segment.start >= matchedSegments[0].start) ?? remainingSegments[remainingSegments.length - 1] ?? null;
+        remainingSegments.find((segment) => segment.start >= targetSegments[0].start) ?? remainingSegments[remainingSegments.length - 1] ?? null;
 
       if (fallbackSegment) {
         const fallbackIndex = remainingSegments.findIndex((segment) => segment.id === fallbackSegment.id);
@@ -212,7 +213,7 @@ export function applyEditorNaturalLanguageCommand({
     return { status: 'success', message: `“${targetLabel}”을 삭제했어요.` };
   }
 
-  applySegmentEditSettings(matchedSegments, action.patch, setSegmentEditSettings);
+  applySegmentEditSettings(targetSegments, action.patch, setSegmentEditSettings);
 
   return { status: 'success', message: buildEditSuccessMessage(targetLabel, action.patch) };
 }

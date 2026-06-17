@@ -32,7 +32,7 @@ function AnalyzingRoute() {
 
   if (!pendingAnalysis?.file || !pendingAnalysis.scenarios?.length) return <Navigate to="/upload" replace />;
 
-  return <AnalyzingScreen request={pendingAnalysis} onDone={(result) => navigate('/editor', { state: result })} onBack={() => navigate('/upload')} />;
+  return <AnalyzingScreen request={pendingAnalysis} onDone={(result) => navigate('/editor/mock-job', { state: result })} onBack={() => navigate('/upload')} />;
 }
 
 function EditorRoute() {
@@ -121,7 +121,35 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/editor/:jobId"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4, ease: 'easeInOut' }}
+            >
+              <EditorRoute />
+            </motion.div>
+          }
+        />
+        <Route
           path="/auth"
+          element={
+            <motion.div
+              className="min-h-screen"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <AuthRoute />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/login"
           element={
             <motion.div
               className="min-h-screen"

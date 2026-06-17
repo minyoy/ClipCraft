@@ -115,6 +115,7 @@ export default function VideoUploadPanel({
           ) : (
             <motion.label
               key="empty"
+              data-testid="video-upload-area"
               className={cn(
                 'relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden transition-[border-color,box-shadow,background]',
                 useEmptyStateDesign

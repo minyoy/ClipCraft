@@ -155,7 +155,7 @@ export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingSc
   const overallPct = Math.min(100, progress);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#fafafa] p-10">
+    <div data-testid="loading-page" className="relative flex min-h-screen flex-col items-center justify-center bg-[#fafafa] p-10">
       <div className="absolute top-8 left-10">
         <Logo height={32} />
       </div>

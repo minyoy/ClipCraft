@@ -191,6 +191,7 @@ export default function ScenarioPanel({ accent, panelPadding, accentTint, useEmp
           <input
             ref={inputRef}
             className="flex-1 border-0 bg-transparent text-[13.5px] tracking-[-0.1px] text-black outline-none placeholder:text-[rgba(0,0,0,0.28)]"
+            data-testid="scenario-input"
             onBlur={() => setIsInputFocused(false)}
             onChange={(event) => setInputValue(event.target.value)}
             onFocus={() => setIsInputFocused(true)}
@@ -201,6 +202,7 @@ export default function ScenarioPanel({ accent, panelPadding, accentTint, useEmp
         </div>
         <button
           className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] border-0 transition-colors"
+          data-testid="add-scenario-button"
           onClick={() => addItem()}
           style={{
             background: inputValue.trim() ? accent : 'rgba(0,0,0,0.07)',

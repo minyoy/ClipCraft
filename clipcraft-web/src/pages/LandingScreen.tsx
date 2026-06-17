@@ -102,7 +102,7 @@ export default function LandingScreen() {
   }, []);
 
   const start = () => navigate('/upload');
-  const login = () => navigate('/auth');
+  const login = () => navigate('/login');
   const selectFeature = (featureId: string) => {
     setActiveFeature(featureId);
     document.getElementById(featureId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });

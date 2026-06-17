@@ -15,7 +15,7 @@ export default function LandingHeader({ onLogin, onStart }: { onLogin: () => voi
           <a className="relative py-1 text-[13px] font-[480] tracking-[-0.1px] text-black/70 after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-px after:origin-left after:scale-x-0 after:bg-black after:transition hover:text-black hover:after:scale-x-100" href="#usecase">활용 사례</a>
         </nav>
         <div className="ml-auto flex items-center gap-6">
-          <button className="hidden cursor-pointer border-0 bg-transparent text-[13px] font-[480] tracking-[-0.1px] text-black/70 hover:text-black sm:block" onClick={onLogin} type="button">로그인</button>
+          <button data-testid="login-link" className="hidden cursor-pointer border-0 bg-transparent text-[13px] font-[480] tracking-[-0.1px] text-black/70 hover:text-black sm:block" onClick={onLogin} type="button">로그인</button>
           <LandingButton onClick={onStart}>지금 시작하기</LandingButton>
         </div>
       </div>

@@ -10,6 +10,7 @@ interface AuthFieldProps {
   error?: string | null;
   hint?: string | null;
   icon?: IconName;
+  inputTestId?: string;
   label: string;
   onBlur?: () => void;
   onChange: (value: string) => void;
@@ -24,6 +25,7 @@ export default function AuthField({
   error,
   hint,
   icon,
+  inputTestId,
   label,
   onBlur,
   onChange,
@@ -51,6 +53,7 @@ export default function AuthField({
           autoComplete={autoComplete}
           autoFocus={autoFocus}
           className="h-[46px] min-w-0 flex-1 border-0 bg-transparent text-[14.5px] tracking-[-0.12px] text-black outline-none placeholder:text-black/28"
+          data-testid={inputTestId}
           onBlur={() => {
             setFocused(false);
             onBlur?.();
