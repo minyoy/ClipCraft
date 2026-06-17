@@ -128,10 +128,3 @@ export const useCases = [
     body: '강연, 세미나, 프로젝트 영상에서 핵심 장면만 추려냅니다. 발표 자료와 요약 클립 제작에 바로 활용할 수 있습니다.',
   },
 ];
-
-export function mmss(seconds: number) {
-  const value = Math.floor(seconds);
-  const minutes = Math.floor(value / 60);
-  const rest = value % 60;
-  return `${minutes.toString().padStart(2, '0')}:${rest.toString().padStart(2, '0')}`;
-}

@@ -1,5 +1,3 @@
-import { useTheme } from '@/App';
-import MonoLabel from '@/components/MonoLabel';
 import Icon from '@/components/Icon';
 import { icons } from '@/components/icons';
 import ProjectActionMenu from '@/components/ProjectsScreen/ProjectActionMenu';
@@ -7,17 +5,11 @@ import ProjectThumbnail from '@/components/ProjectsScreen/ProjectThumbnail';
 import StatusPill from '@/components/ProjectsScreen/StatusPill';
 import type { ProjectActionHandlers, ProjectItem } from '@/types/pages/ProjectsScreen';
 
-function formatSize(sizeMB: number) {
-  return sizeMB > 1000 ? `${(sizeMB / 1024).toFixed(1)} GB` : `${sizeMB} MB`;
-}
-
 interface ProjectCardProps extends ProjectActionHandlers {
   project: ProjectItem;
 }
 
 export default function ProjectCard({ onDelete, onDuplicate, onOpen, onRename, onToggleStar, project }: ProjectCardProps) {
-  const { accent } = useTheme();
-
   return (
     <div
       className="group flex cursor-pointer self-start animate-[fadeIn_0.25s_ease_both] flex-col rounded-[14px] border border-[rgba(0,0,0,0.08)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:border-[rgba(0,0,0,0.14)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]"
@@ -40,25 +32,6 @@ export default function ProjectCard({ onDelete, onDuplicate, onOpen, onRename, o
           </div>
           <ProjectActionMenu onDelete={onDelete} onDuplicate={onDuplicate} onRename={onRename} onToggleStar={onToggleStar} project={project} />
         </div>
-
-        {/* <div className="flex items-center gap-3 border-t border-[rgba(0,0,0,0.06)] pt-2.5">
-          <div className="flex flex-col gap-0.5">
-            <MonoLabel className="text-[9.5px]">장면</MonoLabel>
-            <span className="font-mono text-[12.5px] font-medium">{project.scenes}</span>
-          </div>
-          <div className="h-[22px] w-px bg-[rgba(0,0,0,0.07)]" />
-          <div className="flex flex-col gap-0.5">
-            <MonoLabel className="text-[9.5px]">편집본</MonoLabel>
-            <span className="font-mono text-[12.5px] font-medium" style={{ color: project.exported ? accent : 'rgba(0,0,0,0.3)' }}>
-              {project.exported || '—'}
-            </span>
-          </div>
-          <div className="h-[22px] w-px bg-[rgba(0,0,0,0.07)]" />
-          <div className="flex flex-col gap-0.5">
-            <MonoLabel className="text-[9.5px]">용량</MonoLabel>
-            <span className="font-mono text-[12.5px] font-medium">{formatSize(project.sizeMB)}</span>
-          </div>
-        </div> */}
       </div>
     </div>
   );

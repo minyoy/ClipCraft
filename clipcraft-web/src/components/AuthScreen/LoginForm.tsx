@@ -5,6 +5,7 @@ import MonoLabel from '@/components/MonoLabel';
 import PillButton from '@/components/PillButton';
 import { icons } from '@/components/icons';
 import AuthField from '@/components/AuthScreen/AuthField';
+import { isValidEmail } from '@/lib/validation';
 
 interface LoginFormProps {
   onSubmit: () => void;
@@ -23,14 +24,13 @@ export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
-  const validateEmailFormat = (value: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
 
   const submit = (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
     const nextErrors: LoginErrors = {};
 
     if (!email) nextErrors.email = '이메일을 입력해주세요';
-    else if (!validateEmailFormat(email)) nextErrors.email = '올바른 이메일 형식이 아니에요';
+    else if (!isValidEmail(email)) nextErrors.email = '올바른 이메일 형식이 아니에요';
     if (!password) nextErrors.password = '비밀번호를 입력해주세요';
 
     setErrors(nextErrors);
@@ -63,7 +63,7 @@ export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
           icon="mail"
           label="이메일"
           onBlur={() => {
-            if (email && !validateEmailFormat(email)) {
+            if (email && !isValidEmail(email)) {
               setErrors((current) => ({ ...current, email: '올바른 이메일 형식이 아니에요' }));
             }
           }}

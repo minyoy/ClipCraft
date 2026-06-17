@@ -3,6 +3,7 @@ import Logo from '@/components/Logo';
 import MonoLabel from '@/components/MonoLabel';
 import { containerStagger, fadeInUp } from '@/lib/animations';
 import { cn } from '@/lib/cn';
+import { getProjectFormatLabel } from '@/lib/projectFormats';
 
 interface UploadHeaderProps {
   onLogoClick: () => void;
@@ -11,14 +12,8 @@ interface UploadHeaderProps {
   useEmptyStateDesign: boolean;
 }
 
-const formatLabels: Record<string, string> = {
-  '16:9': '가로 16:9',
-  '9:16': '세로 9:16',
-  '1:1': '정사각형 1:1',
-};
-
 export default function UploadHeader({ onLogoClick, projectFormat, projectName, useEmptyStateDesign }: UploadHeaderProps) {
-  const projectFormatLabel = projectFormat ? (formatLabels[projectFormat] ?? projectFormat) : null;
+  const projectFormatLabel = projectFormat ? getProjectFormatLabel(projectFormat) : null;
 
   return (
     <>

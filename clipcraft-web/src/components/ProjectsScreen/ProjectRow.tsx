@@ -5,11 +5,8 @@ import { icons } from '@/components/icons';
 import ProjectActionMenu from '@/components/ProjectsScreen/ProjectActionMenu';
 import ProjectThumbnail from '@/components/ProjectsScreen/ProjectThumbnail';
 import StatusPill from '@/components/ProjectsScreen/StatusPill';
+import { formatProjectSize } from '@/lib/formatters';
 import type { ProjectActionHandlers, ProjectItem } from '@/types/pages/ProjectsScreen';
-
-function formatSize(sizeMB: number) {
-  return sizeMB > 1000 ? `${(sizeMB / 1024).toFixed(1)} GB` : `${sizeMB} MB`;
-}
 
 interface ProjectRowProps extends ProjectActionHandlers {
   project: ProjectItem;
@@ -46,7 +43,7 @@ export default function ProjectRow({ onDelete, onDuplicate, onOpen, onRename, on
           <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[14.5px] font-[540] tracking-[-0.2px]">{project.title}</span>
         </div>
         <span className="font-mono text-[11.5px] text-[rgba(0,0,0,0.4)]">
-          {project.scenes}개 장면 · {project.format} · {formatSize(project.sizeMB)}
+          {project.scenes}개 장면 · {project.format} · {formatProjectSize(project.sizeMB)}
         </span>
       </div>
       <div className="justify-self-center max-[980px]:hidden">

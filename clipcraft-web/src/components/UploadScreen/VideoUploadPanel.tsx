@@ -23,18 +23,6 @@ interface VideoUploadPanelProps {
   onFileSelect: (file: File) => void;
 }
 
-function DragDots() {
-  return (
-    <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
-      {[2, 6, 10].flatMap((x) =>
-        [3, 7, 11].map((y) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r={1.2} fill="#000" />
-        )),
-      )}
-    </svg>
-  );
-}
-
 function UploadCloudIcon({ active, accent }: { active: boolean; accent: string }) {
   return (
     <svg

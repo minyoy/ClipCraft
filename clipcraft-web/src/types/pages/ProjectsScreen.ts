@@ -1,7 +1,6 @@
 export type ProjectStatus = 'analyzing' | 'completed' | 'draft' | 'editing' | 'failed';
 export type ProjectsView = 'grid' | 'list';
 export type ProjectSort = 'name' | 'updated';
-export type ProjectFilter = ProjectStatus | 'all' | 'starred';
 
 export interface ProjectItem {
   duration: string;

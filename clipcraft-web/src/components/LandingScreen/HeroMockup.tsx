@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Icon from '@/components/Icon';
 import { icons } from '@/components/icons';
 import { cn } from '@/lib/cn';
-import { heroBars, heroSegments, highlights, mmss, monoClass } from '@/components/LandingScreen/landingData';
+import { heroBars, heroSegments, highlights, monoClass } from '@/components/LandingScreen/landingData';
 import kimchiPreview from '@/assets/images/kimchi-preview.png';
 import kimchiPourBoil from '@/assets/images/kimchi-pour-boil.png';
 import kimchiAddScene from '@/assets/images/kimchi-add-scene.png';

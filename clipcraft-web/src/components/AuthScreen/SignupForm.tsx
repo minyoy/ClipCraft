@@ -7,6 +7,7 @@ import { icons } from '@/components/icons';
 import AuthCheckbox from '@/components/AuthScreen/AuthCheckbox';
 import AuthField from '@/components/AuthScreen/AuthField';
 import StrengthMeter from '@/components/AuthScreen/StrengthMeter';
+import { isValidEmail } from '@/lib/validation';
 
 interface SignupFormProps {
   onSubmit: () => void;
@@ -29,7 +30,6 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
   const [agreeMarketing, setAgreeMarketing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<SignupErrors>({});
-  const validateEmailFormat = (value: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
 
   const submit = (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
@@ -37,7 +37,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
 
     if (!name || name.trim().length < 2) nextErrors.name = '이름을 2자 이상 입력해주세요';
     if (!email) nextErrors.email = '이메일을 입력해주세요';
-    else if (!validateEmailFormat(email)) nextErrors.email = '올바른 이메일 형식이 아니에요';
+    else if (!isValidEmail(email)) nextErrors.email = '올바른 이메일 형식이 아니에요';
     if (!password) nextErrors.password = '비밀번호를 입력해주세요';
     else if (password.length < 8) nextErrors.password = '비밀번호는 8자 이상이어야 해요';
     if (!agree) nextErrors.agree = '필수 약관에 동의해주세요';
@@ -88,7 +88,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
           icon="mail"
           label="이메일"
           onBlur={() => {
-            if (email && !validateEmailFormat(email)) {
+            if (email && !isValidEmail(email)) {
               setErrors((current) => ({ ...current, email: '올바른 이메일 형식이 아니에요' }));
             }
           }}
