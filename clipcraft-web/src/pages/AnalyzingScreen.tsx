@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { getAnalyzeJob, normalizeAnalyzeResponse, startAnalyzeJob } from '../api/analyze';
-import { useTheme } from '../App';
-import Logo from '../components/Logo';
-import MonoLabel from '../components/MonoLabel';
-import PillButton from '../components/PillButton';
-import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
+import { getAnalyzeJob, normalizeAnalyzeResponse, startAnalyzeJob } from '@/api/analyze';
+import { useTheme } from '@/App';
+import Logo from '@/components/Logo';
+import MonoLabel from '@/components/MonoLabel';
+import PillButton from '@/components/PillButton';
+import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '@/types/app';
 
 const ANALYSIS_STEPS = [
   { id: 0, label: '영상 파일 수신 중', sub: '분석 요청을 준비하는 중...', duration: 1800 },

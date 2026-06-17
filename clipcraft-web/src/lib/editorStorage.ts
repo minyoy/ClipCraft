@@ -1,4 +1,4 @@
-import type { SegmentEditSetting } from '../types/app';
+import type { SegmentEditSetting } from '@/types/app';
 
 const SEGMENT_EDIT_SETTINGS_KEY = 'editor-segment-edit-settings';
 const DELETED_SEGMENT_IDS_KEY = 'editor-deleted-segment-ids';

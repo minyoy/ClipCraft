@@ -1,29 +1,27 @@
 import { useMemo, useRef, useState } from 'react';
-import DeleteProjectModal from '../components/ProjectsScreen/DeleteProjectModal';
-import EmptySearchState from '../components/ProjectsScreen/EmptySearchState';
-import NewProjectCard from '../components/ProjectsScreen/NewProjectCard';
-import NewProjectModal from '../components/ProjectsScreen/NewProjectModal';
-import ProjectCard from '../components/ProjectsScreen/ProjectCard';
-import ProjectFilterTabs from '../components/ProjectsScreen/ProjectFilterTabs';
-import ProjectRow, { ProjectListHeader } from '../components/ProjectsScreen/ProjectRow';
-import ProjectsPageHeader from '../components/ProjectsScreen/ProjectsPageHeader';
-import ProjectsToolbar from '../components/ProjectsScreen/ProjectsToolbar';
-import ProjectsTopNav from '../components/ProjectsScreen/ProjectsTopNav';
-import RenameProjectModal from '../components/ProjectsScreen/RenameProjectModal';
-import Toast from '../components/ProjectsScreen/Toast';
-import { initialProjects, projectPalettes } from '../components/ProjectsScreen/projectData';
-import type { ProjectFilter, ProjectItem, ProjectSort, ProjectsView, ToastState } from '../types/pages/ProjectsScreen';
+import DeleteProjectModal from '@/components/ProjectsScreen/DeleteProjectModal';
+import EmptySearchState from '@/components/ProjectsScreen/EmptySearchState';
+import NewProjectCard from '@/components/ProjectsScreen/NewProjectCard';
+import NewProjectModal from '@/components/ProjectsScreen/NewProjectModal';
+import ProjectCard from '@/components/ProjectsScreen/ProjectCard';
+import ProjectRow, { ProjectListHeader } from '@/components/ProjectsScreen/ProjectRow';
+import ProjectsPageHeader from '@/components/ProjectsScreen/ProjectsPageHeader';
+import ProjectsToolbar from '@/components/ProjectsScreen/ProjectsToolbar';
+import ProjectsTopNav from '@/components/ProjectsScreen/ProjectsTopNav';
+import RenameProjectModal from '@/components/ProjectsScreen/RenameProjectModal';
+import Toast from '@/components/ProjectsScreen/Toast';
+import { initialProjects, projectPalettes } from '@/components/ProjectsScreen/projectData';
+import type { ProjectItem, ProjectSort, ProjectsView, ToastState } from '@/types/pages/ProjectsScreen';
 
 interface ProjectsScreenProps {
   onLogoClick: () => void;
-  onStartNewProject: () => void;
+  onStartNewProject: (project?: { format?: string; projectName?: string }) => void;
 }
 
 export default function ProjectsScreen({ onLogoClick, onStartNewProject }: ProjectsScreenProps) {
   const [projects, setProjects] = useState<ProjectItem[]>(initialProjects);
   const [view, setView] = useState<ProjectsView>('grid');
   const [query, setQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<ProjectFilter>('all');
   const [sort, setSort] = useState<ProjectSort>('updated');
   const [deleteTarget, setDeleteTarget] = useState<ProjectItem | null>(null);
   const [renameTarget, setRenameTarget] = useState<ProjectItem | null>(null);
@@ -34,38 +32,14 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
   const filteredProjects = useMemo(() => {
     let list = projects.filter((project) => project.title.toLowerCase().includes(query.toLowerCase()));
 
-    if (activeFilter === 'starred') list = list.filter((project) => project.starred);
-    else if (activeFilter !== 'all') list = list.filter((project) => project.status === activeFilter);
-
     if (sort === 'name') list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'ko'));
 
     return list;
-  }, [activeFilter, projects, query, sort]);
-
-  const counts = useMemo(
-    () => ({
-      all: projects.length,
-      starred: projects.filter((project) => project.starred).length,
-      editing: projects.filter((project) => project.status === 'editing').length,
-      completed: projects.filter((project) => project.status === 'completed').length,
-      analyzing: projects.filter((project) => project.status === 'analyzing').length,
-      draft: projects.filter((project) => project.status === 'draft').length,
-    }),
-    [projects],
-  );
-
-  const filterTabs = [
-    { id: 'all' as const, label: '전체', count: counts.all },
-    { id: 'starred' as const, label: '즐겨찾기', count: counts.starred },
-    { id: 'editing' as const, label: '편집중', count: counts.editing },
-    { id: 'completed' as const, label: '완료', count: counts.completed },
-    { id: 'analyzing' as const, label: '분석중', count: counts.analyzing },
-    { id: 'draft' as const, label: '초안', count: counts.draft },
-  ];
+  }, [projects, query, sort]);
 
   const openProject = (project: ProjectItem) => {
     if (project.status === 'draft') {
-      onStartNewProject();
+      onStartNewProject({ format: project.format, projectName: project.title });
       return;
     }
 
@@ -146,6 +120,7 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
 
     setProjects((current) => [project, ...current]);
     setNewOpen(false);
+    onStartNewProject({ format, projectName: name });
     setToast({ icon: 'check', message: '프로젝트가 생성됐어요. 영상을 업로드해보세요!' });
   };
 
@@ -163,7 +138,6 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
       <main className="mx-auto w-full max-w-[1440px] flex-1 px-10 pt-9 pb-20 max-[760px]:px-5">
         <ProjectsPageHeader count={projects.length} onNewProject={() => setNewOpen(true)} />
         <ProjectsToolbar onQueryChange={setQuery} onSortChange={setSort} onViewChange={setView} query={query} sort={sort} view={view} />
-        {/* <ProjectFilterTabs activeFilter={activeFilter} onChange={setActiveFilter} tabs={filterTabs} /> */}
 
         {filteredProjects.length === 0 && query ? (
           <EmptySearchState onClear={() => setQuery('')} query={query} />

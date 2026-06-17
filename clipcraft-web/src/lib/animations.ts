@@ -135,29 +135,3 @@ export const fadeSwap: Variants = {
     },
   },
 };
-
-export const softSwap: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 12,
-    filter: 'blur(2px)',
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: {
-      duration: 0.24,
-      ease: easeOutExpo,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -8,
-    filter: 'blur(2px)',
-    transition: {
-      duration: 0.18,
-      ease: easeOutExpo,
-    },
-  },
-};

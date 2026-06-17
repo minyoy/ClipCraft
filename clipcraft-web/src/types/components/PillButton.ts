@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
-import type { IconName } from '../../components/icons';
+import type { IconName } from '@/components/icons';
 
 export type PillVariant = 'accent' | 'black' | 'white' | 'glass' | 'danger';
 

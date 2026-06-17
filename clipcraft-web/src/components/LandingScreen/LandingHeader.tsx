@@ -1,7 +1,7 @@
-import Logo from '../Logo';
-import { cn } from '../../lib/cn';
-import { wrapClass } from './landingData';
-import { LandingButton } from './LandingPrimitives';
+import Logo from '@/components/Logo';
+import { cn } from '@/lib/cn';
+import { wrapClass } from '@/components/LandingScreen/landingData';
+import { LandingButton } from '@/components/LandingScreen/LandingPrimitives';
 
 export default function LandingHeader({ onLogin, onStart }: { onLogin: () => void; onStart: () => void }) {
   return (

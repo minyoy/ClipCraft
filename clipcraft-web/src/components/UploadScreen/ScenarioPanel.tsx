@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DragEvent, KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import { icons } from '../icons';
-import { fadeInUp } from '../../lib/animations';
-import { cn } from '../../lib/cn';
-import type { ScenarioItem } from '../../types/app';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import { icons } from '@/components/icons';
+import { fadeInUp } from '@/lib/animations';
+import { cn } from '@/lib/cn';
+import type { ScenarioItem } from '@/types/app';
 
 interface ScenarioPanelProps {
   accent: string;

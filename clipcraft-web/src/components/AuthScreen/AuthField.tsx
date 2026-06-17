@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import { icons, type IconName } from '../icons';
-import { useTheme } from '../../App';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import { icons, type IconName } from '@/components/icons';
+import { useTheme } from '@/App';
 
 interface AuthFieldProps {
   autoComplete?: string;
@@ -11,6 +11,7 @@ interface AuthFieldProps {
   hint?: string | null;
   icon?: IconName;
   label: string;
+  onBlur?: () => void;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: 'email' | 'password' | 'text';
@@ -24,6 +25,7 @@ export default function AuthField({
   hint,
   icon,
   label,
+  onBlur,
   onChange,
   placeholder,
   type = 'text',
@@ -35,21 +37,24 @@ export default function AuthField({
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
   return (
-    <div className="flex flex-col gap-[7px]">
-      <MonoLabel>{label}</MonoLabel>
+    <div className="flex flex-col gap-2">
+      <MonoLabel className="text-black/42">{label}</MonoLabel>
       <div
-        className="flex items-center gap-2.5 rounded-xl bg-white px-3.5 py-[11px] transition-[border-color,box-shadow]"
+        className="flex min-h-[48px] items-center gap-2.5 rounded-[14px] bg-white px-4 transition-[border-color,box-shadow,background-color]"
         style={{
-          border: `1.5px solid ${error ? '#dc2626' : focused ? accent : 'rgba(0,0,0,0.12)'}`,
-          boxShadow: focused && !error ? `0 0 0 4px ${accent}14` : error ? '0 0 0 4px rgba(220,38,38,0.10)' : 'none',
+          border: `1px solid ${error ? '#dc2626' : focused ? accent : 'rgba(0,0,0,0.105)'}`,
+          boxShadow: focused && !error ? `0 0 0 4px ${accent}18` : error ? '0 0 0 4px rgba(220,38,38,0.09)' : '0 1px 0 rgba(0,0,0,0.02)',
         }}
       >
-        {icon && <Icon d={icons[icon]} size={15} stroke={focused ? accent : 'rgba(0,0,0,0.4)'} strokeWidth={1.6} />}
+        {icon && <Icon d={icons[icon]} size={15} stroke={focused ? accent : 'rgba(0,0,0,0.34)'} strokeWidth={1.6} />}
         <input
           autoComplete={autoComplete}
           autoFocus={autoFocus}
-          className="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] tracking-[-0.15px] text-black outline-none placeholder:text-[rgba(0,0,0,0.3)]"
-          onBlur={() => setFocused(false)}
+          className="h-[46px] min-w-0 flex-1 border-0 bg-transparent text-[14.5px] tracking-[-0.12px] text-black outline-none placeholder:text-black/28"
+          onBlur={() => {
+            setFocused(false);
+            onBlur?.();
+          }}
           onChange={(event) => onChange(event.target.value)}
           onFocus={() => setFocused(true)}
           placeholder={placeholder}
@@ -57,7 +62,7 @@ export default function AuthField({
           value={value}
         />
         {type === 'password' && value && (
-          <button className="flex cursor-pointer border-0 bg-transparent p-0.5" onClick={() => setShowPassword((current) => !current)} type="button">
+          <button className="flex cursor-pointer border-0 bg-transparent p-1" onClick={() => setShowPassword((current) => !current)} type="button">
             <Icon d={showPassword ? icons.eyeOff : icons.eye} size={15} stroke="rgba(0,0,0,0.4)" />
           </button>
         )}

@@ -1,6 +1,6 @@
-import Icon from '../Icon';
-import { icons } from '../icons';
-import type { ProjectItem } from '../../types/pages/ProjectsScreen';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import type { ProjectItem } from '@/types/pages/ProjectsScreen';
 
 interface ProjectThumbnailProps {
   project: ProjectItem;

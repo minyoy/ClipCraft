@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import TweaksPanel from './components/TweaksPanel';
-import AppRouter from './router/AppRouter';
-import type { ThemeTweaks } from './types/app';
+import TweaksPanel from '@/components/TweaksPanel';
+import AppRouter from '@/router/AppRouter';
+import type { ThemeTweaks } from '@/types/app';
 
 const TWEAK_DEFAULTS: ThemeTweaks = {
   accent: '#5B4CF5',

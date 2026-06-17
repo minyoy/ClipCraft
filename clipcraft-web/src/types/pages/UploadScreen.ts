@@ -1,6 +1,8 @@
-import type { PendingHighlightAnalysis } from '../app';
+import type { PendingHighlightAnalysis } from '@/types/app';
 
 export interface UploadScreenProps {
+  initialProjectFormat?: string;
+  initialProjectName?: string;
   onNext: (request: PendingHighlightAnalysis) => void;
   onLogoClick: () => void;
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { cn } from '../../lib/cn';
-import { monoClass, sectionTitleClass } from './landingData';
+import { cn } from '@/lib/cn';
+import { monoClass, sectionTitleClass } from '@/components/LandingScreen/landingData';
 
 export function MonoLabel({ children, strong = false, light = false, className = '' }: { children: ReactNode; strong?: boolean; light?: boolean; className?: string }) {
   return (

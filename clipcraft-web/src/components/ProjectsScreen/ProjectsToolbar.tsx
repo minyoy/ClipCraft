@@ -1,7 +1,7 @@
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import { icons } from '../icons';
-import type { ProjectSort, ProjectsView } from '../../types/pages/ProjectsScreen';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import { icons } from '@/components/icons';
+import type { ProjectSort, ProjectsView } from '@/types/pages/ProjectsScreen';
 
 interface ProjectsToolbarProps {
   onQueryChange: (query: string) => void;

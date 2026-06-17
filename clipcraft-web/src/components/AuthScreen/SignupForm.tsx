@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react';
-import { useTheme } from '../../App';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import PillButton from '../PillButton';
-import { icons } from '../icons';
-import AuthCheckbox from './AuthCheckbox';
-import AuthField from './AuthField';
-import StrengthMeter from './StrengthMeter';
+import { useTheme } from '@/App';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import PillButton from '@/components/PillButton';
+import { icons } from '@/components/icons';
+import AuthCheckbox from '@/components/AuthScreen/AuthCheckbox';
+import AuthField from '@/components/AuthScreen/AuthField';
+import StrengthMeter from '@/components/AuthScreen/StrengthMeter';
+import { isValidEmail } from '@/lib/validation';
 
 interface SignupFormProps {
   onSubmit: () => void;
@@ -36,7 +37,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
 
     if (!name || name.trim().length < 2) nextErrors.name = '이름을 2자 이상 입력해주세요';
     if (!email) nextErrors.email = '이메일을 입력해주세요';
-    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) nextErrors.email = '올바른 이메일 형식이 아니에요';
+    else if (!isValidEmail(email)) nextErrors.email = '올바른 이메일 형식이 아니에요';
     if (!password) nextErrors.password = '비밀번호를 입력해주세요';
     else if (password.length < 8) nextErrors.password = '비밀번호는 8자 이상이어야 해요';
     if (!agree) nextErrors.agree = '필수 약관에 동의해주세요';
@@ -52,20 +53,22 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
   };
 
   return (
-    <form className="flex animate-[fadeIn_0.3s_ease] flex-col gap-5" onSubmit={submit}>
+    <form className="flex animate-[fadeIn_0.3s_ease] flex-col gap-6" onSubmit={submit}>
       <div>
-        <MonoLabel className="mb-3 block text-black/40">Sign up</MonoLabel>
-        <h2 className="mb-1.5 text-[32px] leading-[1.15] font-[620] tracking-[-0.9px]">
-          AI 영상 편집을
-          <br />
+        <MonoLabel className="mb-4 block text-black/35">SIGN UP</MonoLabel>
+        <h2 className="mb-3 whitespace-pre-line text-[31px] leading-[1.16] font-[620] tracking-[-0.8px] text-black max-[520px]:text-[28px]">
+          영상 편집을
+          {'\n'}
           더 빠르게 시작하세요
         </h2>
-        <p className="text-sm leading-[1.55] tracking-[-0.15px] text-black/50">
-          원하는 장면을 말로 찾고, 편집 시간을 줄여보세요.
+        <p className="whitespace-pre-line text-[14.5px] leading-[1.62] tracking-[-0.12px] text-black/52">
+          원하는 장면을 말로 찾고,
+          {'\n'}
+          숏폼 제작 시간을 줄여보세요.
         </p>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-[18px]">
         <AuthField
           autoComplete="name"
           autoFocus
@@ -76,7 +79,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
             setName(value);
             if (errors.name) setErrors((current) => ({ ...current, name: null }));
           }}
-          placeholder="홍길동"
+          placeholder="이름을 입력하세요"
           value={name}
         />
         <AuthField
@@ -84,6 +87,11 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
           error={errors.email}
           icon="mail"
           label="이메일"
+          onBlur={() => {
+            if (email && !isValidEmail(email)) {
+              setErrors((current) => ({ ...current, email: '올바른 이메일 형식이 아니에요' }));
+            }
+          }}
           onChange={(value) => {
             setEmail(value);
             if (errors.email) setErrors((current) => ({ ...current, email: null }));
@@ -95,14 +103,14 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
         <AuthField
           autoComplete="new-password"
           error={errors.password}
-          hint={!errors.password && !password ? '영문 대/소문자, 숫자, 특수문자 조합을 권장해요' : null}
+          hint={!errors.password && !password ? '영문 대소문자, 숫자 조합을 권장해요' : null}
           icon="lock"
           label="비밀번호"
           onChange={(value) => {
             setPassword(value);
             if (errors.password) setErrors((current) => ({ ...current, password: null }));
           }}
-          placeholder="8자 이상, 영문 + 숫자"
+          placeholder="8자 이상, 영문과 숫자 포함"
           type="password"
           value={password}
         />
@@ -114,10 +122,10 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
           checked={agree}
           label={
             <>
-              <span className="font-[540]" style={{ color: accent }}>
+              <span className="font-[540] text-black/55">
                 [필수]
               </span>{' '}
-              이용약관 및 개인정보 처리방침에 동의합니다
+              이용약관과 개인정보 처리방침에 동의합니다
             </>
           }
           onChange={(checked) => {
@@ -134,7 +142,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
           checked={agreeMarketing}
           label={
             <>
-              <span className="font-[480] text-[rgba(0,0,0,0.4)]">[선택]</span> 마케팅 정보 수신 (이메일)
+              <span className="font-[480] text-black/42">[선택]</span> 마케팅 정보 수신에 동의합니다
             </>
           }
           onChange={setAgreeMarketing}
@@ -147,12 +155,12 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
         </div>
       )}
 
-      <PillButton fullWidth loading={loading} type="submit" variant="accent">
-        {loading ? '계정 만드는 중...' : '시작하기'}
+      <PillButton fullWidth loading={loading} type="submit" variant="black" className="mt-1 py-[13px] text-[14.5px] font-[520]">
+        {loading ? '계정 만드는 중...' : '회원가입'}
       </PillButton>
 
-      <p className="text-center text-[13.5px] tracking-[-0.1px] text-black/50">
-        이미 계정이 있으신가요?{'   '}
+      <p className="pt-0.5 text-center text-[13.5px] tracking-[-0.1px] text-black/48">
+        이미 계정이 있으신가요?{' '}
         <button className="cursor-pointer border-0 bg-transparent p-0 text-[13.5px] font-[540] tracking-[-0.1px] transition hover:opacity-75" onClick={onSwitch} style={{ color: accent }} type="button">
           로그인
         </button>

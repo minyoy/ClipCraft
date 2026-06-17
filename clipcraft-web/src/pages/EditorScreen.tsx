@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTheme } from '../App';
-import Logo from '../components/Logo';
-import PillButton from '../components/PillButton';
-import AiAssistant from '../components/EditorScreen/AiAssistant';
-import HighlightList from '../components/EditorScreen/HighlightList';
-import PlayerControls, { getScrubPosition } from '../components/EditorScreen/PlayerControls';
-import VideoPreview from '../components/EditorScreen/VideoPreview';
-import WaveformTimeline from '../components/EditorScreen/WaveformTimeline';
-import { applyEditorNaturalLanguageCommand } from '../lib/editorNaturalLanguageCommands';
-import { loadDeletedSegmentIds, loadSegmentEditSettings, saveDeletedSegmentIds, saveSegmentEditSettings } from '../lib/editorStorage';
-import type { EditorHighlightSegment, ExportState, SegmentEditSetting } from '../types/app';
-import type { EditorScreenProps, NaturalLanguageCommandResult } from '../types/pages/EditorScreen';
+import { useTheme } from '@/App';
+import Logo from '@/components/Logo';
+import PillButton from '@/components/PillButton';
+import AiAssistant from '@/components/EditorScreen/AiAssistant';
+import HighlightList from '@/components/EditorScreen/HighlightList';
+import PlayerControls, { getScrubPosition } from '@/components/EditorScreen/PlayerControls';
+import VideoPreview from '@/components/EditorScreen/VideoPreview';
+import WaveformTimeline from '@/components/EditorScreen/WaveformTimeline';
+import { applyEditorNaturalLanguageCommand } from '@/lib/editorNaturalLanguageCommands';
+import { loadDeletedSegmentIds, loadSegmentEditSettings, saveDeletedSegmentIds, saveSegmentEditSettings } from '@/lib/editorStorage';
+import type { EditorHighlightSegment, ExportState, SegmentEditSetting } from '@/types/app';
+import type { EditorScreenProps, NaturalLanguageCommandResult } from '@/types/pages/EditorScreen';
 
 const fallbackWaveHeights = Array.from(
   { length: 88 },

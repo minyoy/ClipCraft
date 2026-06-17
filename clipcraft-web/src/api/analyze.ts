@@ -1,5 +1,5 @@
-import { ApiError, getApiUrl, requestJson, requestStatusJson } from './client';
-import type { HighlightAnalysisData, ScenarioItem } from '../types/app';
+import { ApiError, getApiUrl, requestJson, requestStatusJson } from '@/api/client';
+import type { HighlightAnalysisData, ScenarioItem } from '@/types/app';
 
 const DEFAULT_ANALYZE_API_URL = '/analyze';
 const DEFAULT_LOCAL_VIDEO_BASE_PATH = '/app/clip_search/';

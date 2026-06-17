@@ -1,18 +1,28 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import AnalyzingScreen from '../pages/AnalyzingScreen';
-import AuthScreen from '../pages/AuthScreen';
-import EditorScreen from '../pages/EditorScreen';
-import LandingScreen from '../pages/LandingScreen';
-import ProjectsScreen from '../pages/ProjectsScreen';
-import UploadScreen from '../pages/UploadScreen';
-import { pageTransition } from '../lib/animations';
-import { mockEditorAnalysis } from '../mock/editorAnalysis';
-import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
+import AnalyzingScreen from '@/pages/AnalyzingScreen';
+import AuthScreen from '@/pages/AuthScreen';
+import EditorScreen from '@/pages/EditorScreen';
+import LandingScreen from '@/pages/LandingScreen';
+import ProjectsScreen from '@/pages/ProjectsScreen';
+import UploadScreen from '@/pages/UploadScreen';
+import { pageTransition } from '@/lib/animations';
+import { mockEditorAnalysis } from '@/mock/editorAnalysis';
+import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '@/types/app';
 
 function UploadRoute() {
+  const location = useLocation();
   const navigate = useNavigate();
-  return <UploadScreen onLogoClick={() => navigate('/')} onNext={(result) => navigate('/analyzing', { state: result })} />;
+  const routeState = location.state as { format?: string; projectName?: string } | null;
+
+  return (
+    <UploadScreen
+      initialProjectFormat={routeState?.format}
+      initialProjectName={routeState?.projectName}
+      onLogoClick={() => navigate('/')}
+      onNext={(result) => navigate('/analyzing', { state: result })}
+    />
+  );
 }
 
 function AnalyzingRoute() {
@@ -46,12 +56,12 @@ function EditorRoute() {
 
 function AuthRoute() {
   const navigate = useNavigate();
-  return <AuthScreen onContinue={() => navigate('/projects')} onLogoClick={() => navigate('/')} />;
+  return <AuthScreen onContinue={() => navigate('/workspace')} onLogoClick={() => navigate('/')} />;
 }
 
 function ProjectsRoute() {
   const navigate = useNavigate();
-  return <ProjectsScreen onLogoClick={() => navigate('/')} onStartNewProject={() => navigate('/upload')} />;
+  return <ProjectsScreen onLogoClick={() => navigate('/')} onStartNewProject={(project) => navigate('/upload', { state: project })} />;
 }
 
 export default function AppRouter() {
@@ -125,7 +135,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/projects"
+          path="/workspace"
           element={
             <motion.div
               className="min-h-screen"

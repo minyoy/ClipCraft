@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import { cn } from '../../lib/cn';
-import { featureBars, heroSegments, highlights, monoClass } from './landingData';
-import type { FeatureVisualType } from './landingData';
-import { MonoLabel } from './LandingPrimitives';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import { cn } from '@/lib/cn';
+import { featureBars, heroSegments, highlights, monoClass } from '@/components/LandingScreen/landingData';
+import type { FeatureVisualType } from '@/components/LandingScreen/landingData';
+import { MonoLabel } from '@/components/LandingScreen/LandingPrimitives';
 
 function SearchVisual() {
   return (
