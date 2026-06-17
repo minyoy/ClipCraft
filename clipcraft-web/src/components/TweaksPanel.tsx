@@ -1,6 +1,6 @@
-import { cn } from '../lib/cn';
-import type { Density, ThemeTweaks } from '../types/app';
-import type { TweaksPanelProps } from '../types/components/TweaksPanel';
+import { cn } from '@/lib/cn';
+import type { Density, ThemeTweaks } from '@/types/app';
+import type { TweaksPanelProps } from '@/types/components/TweaksPanel';
 
 const ACCENTS = [
   { name: 'Indigo', hex: '#5B4CF5' },

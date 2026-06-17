@@ -1,8 +1,8 @@
-import type { ProjectItem } from '../../types/pages/ProjectsScreen';
-import bakingClassPreview from '../../assets/images/baking-class-preview.png';
-import campingVlogPreview from '../../assets/images/camping-vlog-preview.png';
-import lectureHighlightPreview from '../../assets/images/lecture-highlight-preview.png';
-import teamRetrospectiveSummaryPreview from '../../assets/images/team-retrospective-summary-preview.png';
+import type { ProjectItem } from '@/types/pages/ProjectsScreen';
+import bakingClassPreview from '@/assets/images/baking-class-preview.png';
+import campingVlogPreview from '@/assets/images/camping-vlog-preview.png';
+import lectureHighlightPreview from '@/assets/images/lecture-highlight-preview.png';
+import teamRetrospectiveSummaryPreview from '@/assets/images/team-retrospective-summary-preview.png';
 
 export const initialProjects: ProjectItem[] = [
   {

@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
-import type { EditorHighlightSegment, SegmentEditSetting } from '../types/app';
-import type { NaturalLanguageCommandResult } from '../types/pages/EditorScreen';
+import type { EditorHighlightSegment, SegmentEditSetting } from '@/types/app';
+import type { NaturalLanguageCommandResult } from '@/types/pages/EditorScreen';
 
 type SegmentEditPatch = Partial<Pick<SegmentEditSetting, 'muted' | 'speed'>>;
 

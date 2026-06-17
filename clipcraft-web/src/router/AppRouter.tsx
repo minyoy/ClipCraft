@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import AnalyzingScreen from '../pages/AnalyzingScreen';
-import AuthScreen from '../pages/AuthScreen';
-import EditorScreen from '../pages/EditorScreen';
-import LandingScreen from '../pages/LandingScreen';
-import ProjectsScreen from '../pages/ProjectsScreen';
-import UploadScreen from '../pages/UploadScreen';
-import { pageTransition } from '../lib/animations';
-import { mockEditorAnalysis } from '../mock/editorAnalysis';
-import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '../types/app';
+import AnalyzingScreen from '@/pages/AnalyzingScreen';
+import AuthScreen from '@/pages/AuthScreen';
+import EditorScreen from '@/pages/EditorScreen';
+import LandingScreen from '@/pages/LandingScreen';
+import ProjectsScreen from '@/pages/ProjectsScreen';
+import UploadScreen from '@/pages/UploadScreen';
+import { pageTransition } from '@/lib/animations';
+import { mockEditorAnalysis } from '@/mock/editorAnalysis';
+import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '@/types/app';
 
 function UploadRoute() {
   const navigate = useNavigate();

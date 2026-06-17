@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import AuthLayout from '../components/AuthScreen/AuthLayout';
-import AuthSuccessState from '../components/AuthScreen/AuthSuccessState';
-import LoginForm from '../components/AuthScreen/LoginForm';
-import SignupForm from '../components/AuthScreen/SignupForm';
+import AuthLayout from '@/components/AuthScreen/AuthLayout';
+import AuthSuccessState from '@/components/AuthScreen/AuthSuccessState';
+import LoginForm from '@/components/AuthScreen/LoginForm';
+import SignupForm from '@/components/AuthScreen/SignupForm';
 
 type AuthMode = 'login' | 'signup';
 

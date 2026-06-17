@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Logo from '../Logo';
+import Logo from '@/components/Logo';
 
 export default function AuthLayout({ children, onLogoClick }: { children: ReactNode; onLogoClick?: () => void }) {
   return (

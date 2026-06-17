@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useTheme } from '../App';
-import MonoLabel from '../components/MonoLabel';
-import PillButton from '../components/PillButton';
-import UploadHeader from '../components/UploadScreen/UploadHeader';
-import StepIndicator from '../components/UploadScreen/StepIndicator';
-import VideoUploadPanel from '../components/UploadScreen/VideoUploadPanel';
-import ScenarioPanel from '../components/UploadScreen/ScenarioPanel';
-import { containerStagger, fadeInUp } from '../lib/animations';
-import { cn } from '../lib/cn';
-import { captureVideoThumbnail, formatDuration, formatFileSize, isVideoFile, loadVideoDuration, MAX_VIDEO_DURATION_SECONDS } from '../lib/videoUpload';
-import type { ScenarioItem } from '../types/app';
-import type { UploadedVideo, UploadScreenProps, UploadStatus } from '../types/pages/UploadScreen';
+import { useTheme } from '@/App';
+import MonoLabel from '@/components/MonoLabel';
+import PillButton from '@/components/PillButton';
+import UploadHeader from '@/components/UploadScreen/UploadHeader';
+import StepIndicator from '@/components/UploadScreen/StepIndicator';
+import VideoUploadPanel from '@/components/UploadScreen/VideoUploadPanel';
+import ScenarioPanel from '@/components/UploadScreen/ScenarioPanel';
+import { containerStagger, fadeInUp } from '@/lib/animations';
+import { cn } from '@/lib/cn';
+import { captureVideoThumbnail, formatDuration, formatFileSize, isVideoFile, loadVideoDuration, MAX_VIDEO_DURATION_SECONDS } from '@/lib/videoUpload';
+import type { ScenarioItem } from '@/types/app';
+import type { UploadedVideo, UploadScreenProps, UploadStatus } from '@/types/pages/UploadScreen';
 
 export default function UploadFlow({ onLogoClick, onNext }: UploadScreenProps) {
   const { accent, density } = useTheme();

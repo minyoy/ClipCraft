@@ -3,12 +3,12 @@ import type { Variants } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import FeatureSection from '../components/LandingScreen/FeatureSection';
-import LandingFeatureNav from '../components/LandingScreen/LandingFeatureNav';
-import LandingHeader from '../components/LandingScreen/LandingHeader';
-import { CtaSection, HeroSection, LandingFooter, ProblemSection, UseCaseSection } from '../components/LandingScreen/LandingSections';
-import { features } from '../components/LandingScreen/landingData';
-import { cn } from '../lib/cn';
+import FeatureSection from '@/components/LandingScreen/FeatureSection';
+import LandingFeatureNav from '@/components/LandingScreen/LandingFeatureNav';
+import LandingHeader from '@/components/LandingScreen/LandingHeader';
+import { CtaSection, HeroSection, LandingFooter, ProblemSection, UseCaseSection } from '@/components/LandingScreen/LandingSections';
+import { features } from '@/components/LandingScreen/landingData';
+import { cn } from '@/lib/cn';
 
 const FEATURE_NAV_REVEAL_RATIO = 0.1;
 const FEATURE_NAV_HIDE_RATIO = 0.8;

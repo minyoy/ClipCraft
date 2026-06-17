@@ -1,5 +1,5 @@
-import { useTheme } from '../../App';
-import type { ProjectStatus } from '../../types/pages/ProjectsScreen';
+import { useTheme } from '@/App';
+import type { ProjectStatus } from '@/types/pages/ProjectsScreen';
 
 const STATUS_META: Record<ProjectStatus, { bg: string; dot: string; fg: string; ko: string }> = {
   completed: { ko: '분석 완료', dot: '#10b981', bg: 'rgba(16,185,129,0.10)', fg: '#067f5b' },

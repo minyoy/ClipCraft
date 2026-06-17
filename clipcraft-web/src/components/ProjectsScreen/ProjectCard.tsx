@@ -1,11 +1,11 @@
-import { useTheme } from '../../App';
-import MonoLabel from '../MonoLabel';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import ProjectActionMenu from './ProjectActionMenu';
-import ProjectThumbnail from './ProjectThumbnail';
-import StatusPill from './StatusPill';
-import type { ProjectActionHandlers, ProjectItem } from '../../types/pages/ProjectsScreen';
+import { useTheme } from '@/App';
+import MonoLabel from '@/components/MonoLabel';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import ProjectActionMenu from '@/components/ProjectsScreen/ProjectActionMenu';
+import ProjectThumbnail from '@/components/ProjectsScreen/ProjectThumbnail';
+import StatusPill from '@/components/ProjectsScreen/StatusPill';
+import type { ProjectActionHandlers, ProjectItem } from '@/types/pages/ProjectsScreen';
 
 function formatSize(sizeMB: number) {
   return sizeMB > 1000 ? `${(sizeMB / 1024).toFixed(1)} GB` : `${sizeMB} MB`;

@@ -1,7 +1,7 @@
-import Icon from '../Icon';
-import { icons } from '../icons';
-import { cn } from '../../lib/cn';
-import type { ChatMessageProps } from '../../types/pages/EditorScreen';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import { cn } from '@/lib/cn';
+import type { ChatMessageProps } from '@/types/pages/EditorScreen';
 
 export default function ChatMessage({ accent, message }: ChatMessageProps) {
   const isUser = message.role === 'user';

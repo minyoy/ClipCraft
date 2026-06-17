@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { useTheme } from '../../App';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import PillButton from '../PillButton';
-import { icons } from '../icons';
-import AuthCheckbox from './AuthCheckbox';
-import AuthField from './AuthField';
-import StrengthMeter from './StrengthMeter';
+import { useTheme } from '@/App';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import PillButton from '@/components/PillButton';
+import { icons } from '@/components/icons';
+import AuthCheckbox from '@/components/AuthScreen/AuthCheckbox';
+import AuthField from '@/components/AuthScreen/AuthField';
+import StrengthMeter from '@/components/AuthScreen/StrengthMeter';
 
 interface SignupFormProps {
   onSubmit: () => void;

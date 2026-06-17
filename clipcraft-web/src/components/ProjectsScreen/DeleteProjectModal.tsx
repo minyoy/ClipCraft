@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import Icon from '../Icon';
-import PillButton from '../PillButton';
-import { icons } from '../icons';
-import type { ProjectItem } from '../../types/pages/ProjectsScreen';
+import Icon from '@/components/Icon';
+import PillButton from '@/components/PillButton';
+import { icons } from '@/components/icons';
+import type { ProjectItem } from '@/types/pages/ProjectsScreen';
 
 interface DeleteProjectModalProps {
   onCancel: () => void;

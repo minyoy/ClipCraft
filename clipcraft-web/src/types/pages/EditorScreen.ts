@@ -1,6 +1,6 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react';
-import type { IconName } from '../../components/icons';
-import type { ChatMessage as AppChatMessage, EditorHighlightSegment, HighlightAnalysisData, SegmentEditSetting } from '../app';
+import type { IconName } from '@/components/icons';
+import type { ChatMessage as AppChatMessage, EditorHighlightSegment, HighlightAnalysisData, SegmentEditSetting } from '@/types/app';
 
 export interface EditorScreenProps {
   onBack: () => void;

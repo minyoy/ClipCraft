@@ -1,4 +1,4 @@
-import type { IconProps } from '../types/components/Icon';
+import type { IconProps } from '@/types/components/Icon';
 
 export default function Icon({
   d,

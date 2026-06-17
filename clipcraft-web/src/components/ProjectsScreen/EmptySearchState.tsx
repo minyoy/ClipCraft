@@ -1,6 +1,6 @@
-import Icon from '../Icon';
-import PillButton from '../PillButton';
-import { icons } from '../icons';
+import Icon from '@/components/Icon';
+import PillButton from '@/components/PillButton';
+import { icons } from '@/components/icons';
 
 interface EmptySearchStateProps {
   onClear: () => void;

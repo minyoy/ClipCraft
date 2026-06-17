@@ -1,18 +1,18 @@
 import { useMemo, useRef, useState } from 'react';
-import DeleteProjectModal from '../components/ProjectsScreen/DeleteProjectModal';
-import EmptySearchState from '../components/ProjectsScreen/EmptySearchState';
-import NewProjectCard from '../components/ProjectsScreen/NewProjectCard';
-import NewProjectModal from '../components/ProjectsScreen/NewProjectModal';
-import ProjectCard from '../components/ProjectsScreen/ProjectCard';
-import ProjectFilterTabs from '../components/ProjectsScreen/ProjectFilterTabs';
-import ProjectRow, { ProjectListHeader } from '../components/ProjectsScreen/ProjectRow';
-import ProjectsPageHeader from '../components/ProjectsScreen/ProjectsPageHeader';
-import ProjectsToolbar from '../components/ProjectsScreen/ProjectsToolbar';
-import ProjectsTopNav from '../components/ProjectsScreen/ProjectsTopNav';
-import RenameProjectModal from '../components/ProjectsScreen/RenameProjectModal';
-import Toast from '../components/ProjectsScreen/Toast';
-import { initialProjects, projectPalettes } from '../components/ProjectsScreen/projectData';
-import type { ProjectFilter, ProjectItem, ProjectSort, ProjectsView, ToastState } from '../types/pages/ProjectsScreen';
+import DeleteProjectModal from '@/components/ProjectsScreen/DeleteProjectModal';
+import EmptySearchState from '@/components/ProjectsScreen/EmptySearchState';
+import NewProjectCard from '@/components/ProjectsScreen/NewProjectCard';
+import NewProjectModal from '@/components/ProjectsScreen/NewProjectModal';
+import ProjectCard from '@/components/ProjectsScreen/ProjectCard';
+import ProjectFilterTabs from '@/components/ProjectsScreen/ProjectFilterTabs';
+import ProjectRow, { ProjectListHeader } from '@/components/ProjectsScreen/ProjectRow';
+import ProjectsPageHeader from '@/components/ProjectsScreen/ProjectsPageHeader';
+import ProjectsToolbar from '@/components/ProjectsScreen/ProjectsToolbar';
+import ProjectsTopNav from '@/components/ProjectsScreen/ProjectsTopNav';
+import RenameProjectModal from '@/components/ProjectsScreen/RenameProjectModal';
+import Toast from '@/components/ProjectsScreen/Toast';
+import { initialProjects, projectPalettes } from '@/components/ProjectsScreen/projectData';
+import type { ProjectFilter, ProjectItem, ProjectSort, ProjectsView, ToastState } from '@/types/pages/ProjectsScreen';
 
 interface ProjectsScreenProps {
   onLogoClick: () => void;

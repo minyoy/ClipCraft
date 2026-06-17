@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import { cn } from '../../lib/cn';
-import { heroBars, heroSegments, highlights, mmss, monoClass } from './landingData';
-import kimchiPreview from '../../assets/images/kimchi-preview.png';
-import kimchiPourBoil from '../../assets/images/kimchi-pour-boil.png';
-import kimchiAddScene from '../../assets/images/kimchi-add-scene.png';
-import kimchiServeBowl from '../../assets/images/kimchi-serve-bowl.png';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import { cn } from '@/lib/cn';
+import { heroBars, heroSegments, highlights, mmss, monoClass } from '@/components/LandingScreen/landingData';
+import kimchiPreview from '@/assets/images/kimchi-preview.png';
+import kimchiPourBoil from '@/assets/images/kimchi-pour-boil.png';
+import kimchiAddScene from '@/assets/images/kimchi-add-scene.png';
+import kimchiServeBowl from '@/assets/images/kimchi-serve-bowl.png';
 
 const segmentImages = [kimchiPourBoil, kimchiAddScene, kimchiServeBowl];
 const segmentBoundaryMarkers = heroSegments.flatMap((segment) => [segment.left, segment.left + segment.width]);

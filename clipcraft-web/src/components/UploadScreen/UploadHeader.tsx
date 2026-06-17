@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import Logo from '../Logo';
-import MonoLabel from '../MonoLabel';
-import { containerStagger, fadeInUp } from '../../lib/animations';
-import { cn } from '../../lib/cn';
+import Logo from '@/components/Logo';
+import MonoLabel from '@/components/MonoLabel';
+import { containerStagger, fadeInUp } from '@/lib/animations';
+import { cn } from '@/lib/cn';
 
 interface UploadHeaderProps {
   onLogoClick: () => void;

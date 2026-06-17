@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react';
-import type { ThemeTweaks } from '../../types/app';
+import type { ThemeTweaks } from '@/types/app';
 
 export interface TweaksPanelProps {
   tweaks: ThemeTweaks;

@@ -1,5 +1,5 @@
-import MonoLabel from '../MonoLabel';
-import PillButton from '../PillButton';
+import MonoLabel from '@/components/MonoLabel';
+import PillButton from '@/components/PillButton';
 
 interface ProjectsPageHeaderProps {
   count: number;

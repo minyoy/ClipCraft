@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import { cn } from '../../lib/cn';
-import { landingInnerStagger, landingItemRise, landingVisualRise } from '../../lib/animations';
-import { sectionTitleClass, wrapClass } from './landingData';
-import type { LandingFeature } from './landingData';
-import FeatureVisual from './FeatureVisuals';
-import { MonoLabel } from './LandingPrimitives';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import { cn } from '@/lib/cn';
+import { landingInnerStagger, landingItemRise, landingVisualRise } from '@/lib/animations';
+import { sectionTitleClass, wrapClass } from '@/components/LandingScreen/landingData';
+import type { LandingFeature } from '@/components/LandingScreen/landingData';
+import FeatureVisual from '@/components/LandingScreen/FeatureVisuals';
+import { MonoLabel } from '@/components/LandingScreen/LandingPrimitives';
 
 export default function FeatureSection({ feature }: { feature: LandingFeature }) {
   return (

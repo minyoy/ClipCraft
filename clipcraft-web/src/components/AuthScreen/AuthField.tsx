@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import { icons, type IconName } from '../icons';
-import { useTheme } from '../../App';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import { icons, type IconName } from '@/components/icons';
+import { useTheme } from '@/App';
 
 interface AuthFieldProps {
   autoComplete?: string;

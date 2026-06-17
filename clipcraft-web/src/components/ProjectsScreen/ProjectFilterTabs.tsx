@@ -1,6 +1,6 @@
-import Icon from '../Icon';
-import { icons } from '../icons';
-import type { ProjectFilter } from '../../types/pages/ProjectsScreen';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import type { ProjectFilter } from '@/types/pages/ProjectsScreen';
 
 interface FilterTab {
   count: number;

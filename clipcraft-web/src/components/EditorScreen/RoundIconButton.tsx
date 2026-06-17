@@ -1,6 +1,6 @@
-import Icon from '../Icon';
-import { icons } from '../icons';
-import type { RoundIconButtonProps } from '../../types/pages/EditorScreen';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import type { RoundIconButtonProps } from '@/types/pages/EditorScreen';
 
 export default function RoundIconButton({ active = false, ariaLabel, icon, onClick, size = 28 }: RoundIconButtonProps) {
   return (

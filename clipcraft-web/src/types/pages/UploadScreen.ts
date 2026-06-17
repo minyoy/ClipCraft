@@ -1,4 +1,4 @@
-import type { PendingHighlightAnalysis } from '../app';
+import type { PendingHighlightAnalysis } from '@/types/app';
 
 export interface UploadScreenProps {
   onNext: (request: PendingHighlightAnalysis) => void;

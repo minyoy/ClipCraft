@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { motion } from 'framer-motion';
-import { fadeInUp } from '../../lib/animations';
-import { cn } from '../../lib/cn';
+import { fadeInUp } from '@/lib/animations';
+import { cn } from '@/lib/cn';
 
 const STEPS = [
   { step: '1', label: '영상 업로드', muted: false },

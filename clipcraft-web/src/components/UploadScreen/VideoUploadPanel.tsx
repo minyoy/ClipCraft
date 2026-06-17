@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from 'framer-motion';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import { icons } from '../icons';
-import { fadeInUp, fadeSwap, videoPreviewEntrance } from '../../lib/animations';
-import { cn } from '../../lib/cn';
-import type { UploadedVideo, UploadStatus } from '../../types/pages/UploadScreen';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import { icons } from '@/components/icons';
+import { fadeInUp, fadeSwap, videoPreviewEntrance } from '@/lib/animations';
+import { cn } from '@/lib/cn';
+import type { UploadedVideo, UploadStatus } from '@/types/pages/UploadScreen';
 
 interface VideoUploadPanelProps {
   accent: string;

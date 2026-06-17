@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import Icon from '../Icon';
-import Logo from '../Logo';
-import { icons } from '../icons';
-import { cn } from '../../lib/cn';
-import { landingInnerStagger, landingItemRise, landingVisualRise } from '../../lib/animations';
-import { displayClass, monoClass, problems, sectionTitleClass, useCases, wrapClass } from './landingData';
-import HeroMockup from './HeroMockup';
-import { LandingButton, MonoLabel, SectionHead } from './LandingPrimitives';
+import Icon from '@/components/Icon';
+import Logo from '@/components/Logo';
+import { icons } from '@/components/icons';
+import { cn } from '@/lib/cn';
+import { landingInnerStagger, landingItemRise, landingVisualRise } from '@/lib/animations';
+import { displayClass, monoClass, problems, sectionTitleClass, useCases, wrapClass } from '@/components/LandingScreen/landingData';
+import HeroMockup from '@/components/LandingScreen/HeroMockup';
+import { LandingButton, MonoLabel, SectionHead } from '@/components/LandingScreen/LandingPrimitives';
 
 export function HeroSection({ onStart }: { onStart: () => void }) {
   return (

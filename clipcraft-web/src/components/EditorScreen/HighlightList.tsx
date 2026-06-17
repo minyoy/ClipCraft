@@ -1,4 +1,4 @@
-import type { HighlightListProps } from '../../types/pages/EditorScreen';
+import type { HighlightListProps } from '@/types/pages/EditorScreen';
 
 function formatTime(seconds: number): string {
   const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;

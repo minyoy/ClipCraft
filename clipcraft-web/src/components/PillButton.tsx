@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useTheme } from '../App';
-import { cn } from '../lib/cn';
-import Icon from './Icon';
-import { icons } from './icons';
-import type { PillButtonProps } from '../types/components/PillButton';
+import { useTheme } from '@/App';
+import { cn } from '@/lib/cn';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import type { PillButtonProps } from '@/types/components/PillButton';
 
 export default function PillButton({
   children,

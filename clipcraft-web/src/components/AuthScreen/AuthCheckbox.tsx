@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { useTheme } from '../../App';
-import Icon from '../Icon';
-import { icons } from '../icons';
+import { useTheme } from '@/App';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
 
 interface AuthCheckboxProps {
   checked: boolean;

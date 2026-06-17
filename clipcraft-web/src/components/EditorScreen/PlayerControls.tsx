@@ -1,9 +1,9 @@
 import type { MouseEvent } from 'react';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import { cn } from '../../lib/cn';
-import type { PlayerControlsProps } from '../../types/pages/EditorScreen';
-import RoundIconButton from './RoundIconButton';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import { cn } from '@/lib/cn';
+import type { PlayerControlsProps } from '@/types/pages/EditorScreen';
+import RoundIconButton from '@/components/EditorScreen/RoundIconButton';
 
 function formatSeconds(value: number) {
   const seconds = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;

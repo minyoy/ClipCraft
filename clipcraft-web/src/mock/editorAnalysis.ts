@@ -1,5 +1,5 @@
 import exampleVideoUrl from '../../example.mp4';
-import type { HighlightAnalysisResult } from '../types/app';
+import type { HighlightAnalysisResult } from '@/types/app';
 
 const mockAmplitudes = Array.from({ length: 88 }, (_, index) => {
   const base = Math.abs(Math.sin(index * 0.42)) * 0.72;

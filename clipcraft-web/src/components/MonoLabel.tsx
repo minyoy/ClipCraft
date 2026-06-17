@@ -1,4 +1,4 @@
-import type { MonoLabelProps } from '../types/components/MonoLabel';
+import type { MonoLabelProps } from '@/types/components/MonoLabel';
 
 export default function MonoLabel({ children, className = '', style = {} }: MonoLabelProps) {
   return (

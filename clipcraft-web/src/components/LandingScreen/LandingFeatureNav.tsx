@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { cn } from '../../lib/cn';
-import { features, wrapClass } from './landingData';
+import { cn } from '@/lib/cn';
+import { features, wrapClass } from '@/components/LandingScreen/landingData';
 
 export default function LandingFeatureNav({ activeFeature, onSelect, visible = true }: { activeFeature: string; onSelect: (featureId: string) => void; visible?: boolean }) {
   const shouldReduceMotion = useReducedMotion();

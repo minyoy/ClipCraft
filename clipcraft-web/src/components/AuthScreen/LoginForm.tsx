@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { useTheme } from '../../App';
-import Icon from '../Icon';
-import MonoLabel from '../MonoLabel';
-import PillButton from '../PillButton';
-import { icons } from '../icons';
-import AuthField from './AuthField';
+import { useTheme } from '@/App';
+import Icon from '@/components/Icon';
+import MonoLabel from '@/components/MonoLabel';
+import PillButton from '@/components/PillButton';
+import { icons } from '@/components/icons';
+import AuthField from '@/components/AuthScreen/AuthField';
 
 interface LoginFormProps {
   onSubmit: () => void;

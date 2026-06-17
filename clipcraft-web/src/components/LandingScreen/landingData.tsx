@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { icons } from '../icons';
+import { icons } from '@/components/icons';
 
 export const ACCENT = '#5B4CF5';
 export const AMBER = '#F59E0B';
@@ -92,18 +92,18 @@ export const features: LandingFeature[] = [
   },
   {
     id: 'f4',
-    tab: 'AI 편집',
+    tab: '대화형 편집',
     no: 'FEATURE 04',
-    title: <>컷을 골랐다면,<br />편집은 말로 끝내세요</>,
-    body: '"이 구간은 2배속으로", "자막을 추가해줘"' + ' 처럼 자연어로 요청하면 AI가 편집안을 제안합니다. 확인 후 적용하면 숏폼 제작이 이어집니다.',
+    title: <>컷을 골랐다면,<br />편집은 대화로 이어가세요</>,
+    body: '"이 구간은 2배속으로", "자막을 추가해줘"' + ' 처럼 자연어로 요청하면 AI가 선택한 컷에 바로 반영합니다. 복잡한 도구 조작 없이 대화하듯 완성하세요.',
     bullets: [
-      '속도, 자막, 전환을 자연어로 지시',
-      '적용 전 편집안 확인 단계 제공',
+      '속도, 자막, 전환을 자연어로 요청',
+      '선택한 구간에 편집 결과 자동 반영',
     ],
     visual: 'chat',
     reverse: true,
     tint: true,
-  },
+  }
 ];
 
 export const useCases = [

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import type { EditChatMessage } from '../../types/app';
-import type { AiAssistantProps } from '../../types/pages/EditorScreen';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import type { EditChatMessage } from '@/types/app';
+import type { AiAssistantProps } from '@/types/pages/EditorScreen';
 
 const EDIT_CHAT_HISTORY_KEY = 'editor-edit-chat-history';
 

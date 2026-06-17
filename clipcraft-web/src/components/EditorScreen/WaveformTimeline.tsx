@@ -1,9 +1,9 @@
 import type { MouseEvent } from 'react';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import MonoLabel from '../MonoLabel';
-import type { WaveformTimelineProps } from '../../types/pages/EditorScreen';
-import type { OverlaySegment } from '../../types/app';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import MonoLabel from '@/components/MonoLabel';
+import type { WaveformTimelineProps } from '@/types/pages/EditorScreen';
+import type { OverlaySegment } from '@/types/app';
 
 const overlayColors = [
   { bg: 'rgba(254,243,199,0.82)', border: '#F59E0B', text: '#92400E' },

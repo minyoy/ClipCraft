@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import Icon from '../Icon';
-import { icons } from '../icons';
-import type { ToastState } from '../../types/pages/ProjectsScreen';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
+import type { ToastState } from '@/types/pages/ProjectsScreen';
 
 interface ToastProps {
   onDismiss: () => void;

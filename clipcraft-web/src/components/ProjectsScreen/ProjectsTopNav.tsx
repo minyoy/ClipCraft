@@ -1,5 +1,5 @@
-import { useTheme } from '../../App';
-import Logo from '../Logo';
+import { useTheme } from '@/App';
+import Logo from '@/components/Logo';
 
 export default function ProjectsTopNav({ onLogoClick }: { onLogoClick: () => void }) {
   const { accent } = useTheme();

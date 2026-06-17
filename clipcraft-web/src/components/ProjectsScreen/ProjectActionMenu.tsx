@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import Icon from '../Icon';
-import { icons, type IconName } from '../icons';
-import type { ProjectActionHandlers, ProjectItem } from '../../types/pages/ProjectsScreen';
+import Icon from '@/components/Icon';
+import { icons, type IconName } from '@/components/icons';
+import type { ProjectActionHandlers, ProjectItem } from '@/types/pages/ProjectsScreen';
 
 interface ProjectActionMenuProps extends Omit<ProjectActionHandlers, 'onOpen'> {
   project: ProjectItem;

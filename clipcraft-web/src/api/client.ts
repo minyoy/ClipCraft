@@ -1,4 +1,4 @@
-import type { ApiErrorBody, ApiRequestBody, ApiResponse, ApiStatusResponse } from './types';
+import type { ApiErrorBody, ApiRequestBody, ApiResponse, ApiStatusResponse } from '@/api/types';
 
 export class ApiError extends Error {
   status: number;

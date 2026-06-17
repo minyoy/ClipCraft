@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
-import { useTheme } from '../../App';
-import Icon from '../Icon';
-import { icons } from '../icons';
+import { useTheme } from '@/App';
+import Icon from '@/components/Icon';
+import { icons } from '@/components/icons';
 
 export default function NewProjectCard({ onClick }: { onClick: () => void }) {
   const { accent } = useTheme();
