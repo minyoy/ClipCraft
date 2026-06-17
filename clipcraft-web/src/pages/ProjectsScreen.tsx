@@ -16,7 +16,7 @@ import type { ProjectFilter, ProjectItem, ProjectSort, ProjectsView, ToastState 
 
 interface ProjectsScreenProps {
   onLogoClick: () => void;
-  onStartNewProject: () => void;
+  onStartNewProject: (project?: { format?: string; projectName?: string }) => void;
 }
 
 export default function ProjectsScreen({ onLogoClick, onStartNewProject }: ProjectsScreenProps) {
@@ -65,7 +65,7 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
 
   const openProject = (project: ProjectItem) => {
     if (project.status === 'draft') {
-      onStartNewProject();
+      onStartNewProject({ format: project.format, projectName: project.title });
       return;
     }
 
@@ -146,6 +146,7 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
 
     setProjects((current) => [project, ...current]);
     setNewOpen(false);
+    onStartNewProject({ format, projectName: name });
     setToast({ icon: 'check', message: '프로젝트가 생성됐어요. 영상을 업로드해보세요!' });
   };
 

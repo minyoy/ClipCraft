@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 const STEPS = [
   { step: '1', label: '영상 업로드', muted: false },
   { step: '2', label: '시나리오 입력', muted: false },
-  { step: '3', label: '편집 시작', muted: true },
+  { step: '3', label: '편집 시작', muted: false },
 ] as const;
 
 export default function StepIndicator() {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import { icons, type IconName } from '@/components/icons';
+import { cn } from '@/lib/cn';
 import type { ProjectActionHandlers, ProjectItem } from '@/types/pages/ProjectsScreen';
 
 interface ProjectActionMenuProps extends Omit<ProjectActionHandlers, 'onOpen'> {
@@ -37,7 +38,7 @@ export default function ProjectActionMenu({ onDelete, onDuplicate, onRename, onT
   ];
 
   return (
-    <div className="relative justify-self-end" ref={menuRef}>
+    <div className={cn('relative justify-self-end', open ? 'z-[1000]' : 'z-0')} ref={menuRef}>
       <button
         className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-lg border-0 transition-colors"
         onClick={(event) => {
@@ -51,12 +52,13 @@ export default function ProjectActionMenu({ onDelete, onDuplicate, onRename, onT
       </button>
       {open && (
         <div
-          className="absolute top-[34px] right-0 z-10 min-w-[180px] animate-[fadeIn_0.14s_ease] rounded-[10px] border border-[rgba(0,0,0,0.1)] bg-white p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.1),0_2px_6px_rgba(0,0,0,0.05)]"
+          className="absolute top-[34px] right-0 z-[120] min-w-[184px] rounded-[12px] border border-black/[0.14] p-1.5 text-black shadow-[0_18px_44px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] ring-1 ring-white"
           onClick={(event) => event.stopPropagation()}
+          style={{ backgroundColor: '#fff', backdropFilter: 'none', opacity: 1 }}
         >
           {items.map((item) => (
             <button
-              className="flex w-full items-center gap-2.5 rounded-md border-0 bg-transparent px-2.5 py-2 text-left text-[13px] tracking-[-0.1px] transition-colors hover:bg-[rgba(0,0,0,0.05)] disabled:cursor-not-allowed disabled:text-[rgba(0,0,0,0.3)] disabled:hover:bg-transparent"
+              className="flex w-full items-center gap-2.5 rounded-lg border-0 px-2.5 py-2 text-left text-[13px] tracking-[-0.1px] text-black/78 transition-colors hover:bg-black/[0.055] disabled:cursor-not-allowed disabled:text-black/30 disabled:hover:bg-white"
               disabled={item.disabled}
               key={item.label}
               onClick={() => {
@@ -71,7 +73,7 @@ export default function ProjectActionMenu({ onDelete, onDuplicate, onRename, onT
           ))}
           <div className="mx-1 my-[5px] h-px bg-[rgba(0,0,0,0.07)]" />
           <button
-            className="flex w-full items-center gap-2.5 rounded-md border-0 bg-transparent px-2.5 py-2 text-left text-[13px] tracking-[-0.1px] text-[#dc2626] transition-colors hover:bg-[rgba(220,38,38,0.06)]"
+            className="flex w-full items-center gap-2.5 rounded-lg border-0 px-2.5 py-2 text-left text-[13px] tracking-[-0.1px] text-[#dc2626] transition-colors hover:bg-[rgba(220,38,38,0.06)]"
             onClick={() => {
               setOpen(false);
               onDelete(project);

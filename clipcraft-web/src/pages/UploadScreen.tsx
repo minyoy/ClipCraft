@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTheme } from '@/App';
-import MonoLabel from '@/components/MonoLabel';
 import PillButton from '@/components/PillButton';
 import UploadHeader from '@/components/UploadScreen/UploadHeader';
 import StepIndicator from '@/components/UploadScreen/StepIndicator';
@@ -13,15 +12,13 @@ import { captureVideoThumbnail, formatDuration, formatFileSize, isVideoFile, loa
 import type { ScenarioItem } from '@/types/app';
 import type { UploadedVideo, UploadScreenProps, UploadStatus } from '@/types/pages/UploadScreen';
 
-export default function UploadFlow({ onLogoClick, onNext }: UploadScreenProps) {
+export default function UploadFlow({ initialProjectFormat, initialProjectName, onLogoClick, onNext }: UploadScreenProps) {
   const { accent, density } = useTheme();
   const fileInputId = useId();
   const shouldReduceMotion = useReducedMotion();
   const panelPadding = density === 'compact' ? 'p-5' : density === 'spacious' ? 'p-9' : 'p-7';
   const accentTint = `${accent}18`;
 
-  const [projectName, setProjectName] = useState('');
-  const [isProjectNameFocused, setIsProjectNameFocused] = useState(false);
   const [items, setItems] = useState<ScenarioItem[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedVideo, setUploadedVideo] = useState<UploadedVideo | null>(null);
@@ -64,6 +61,7 @@ export default function UploadFlow({ onLogoClick, onNext }: UploadScreenProps) {
 
   const useEmptyStateDesign = !hasUploadedVideo;
   const canStartEditing = hasUploadedVideo && items.length > 0;
+  const projectTitle = initialProjectName?.trim() || '영상 편집 시작하기';
 
   const triggerUploadError = (message: string) => {
     setUploadError(message);
@@ -117,7 +115,7 @@ export default function UploadFlow({ onLogoClick, onNext }: UploadScreenProps) {
     videoObjectUrlRef.current = null;
     onNext({
       file: uploadedVideo.file,
-      projectName: projectName.trim() || uploadedVideo.fileName.replace(/\.[^/.]+$/, '') || uploadedVideo.fileName,
+      projectName: initialProjectName?.trim() || uploadedVideo.fileName.replace(/\.[^/.]+$/, '') || uploadedVideo.fileName,
       scenarios: items,
       videoUrl: uploadedVideo.objectUrl,
       videoName: uploadedVideo.fileName,
@@ -135,28 +133,7 @@ export default function UploadFlow({ onLogoClick, onNext }: UploadScreenProps) {
       initial={shouldReduceMotion ? false : 'hidden'}
       animate={shouldReduceMotion ? undefined : 'visible'}
     >
-      <UploadHeader onLogoClick={onLogoClick} useEmptyStateDesign={useEmptyStateDesign} />
-
-      <motion.div className="mb-10 flex w-full flex-col gap-2.5 will-change-[transform,opacity]" variants={fadeInUp}>
-        <MonoLabel className="text-[15px] font-[500] tracking-[0.5px]">프로젝트 이름</MonoLabel>
-        <div
-          className="flex items-center rounded-[10px] bg-white px-3.5 py-2.5 transition-[border-color,box-shadow]"
-          style={{
-            border: `1.5px solid ${isProjectNameFocused ? accent : 'rgba(0,0,0,0.12)'}`,
-            boxShadow: isProjectNameFocused ? `0 0 0 3px ${accent}08` : 'none',
-          }}
-        >
-          <input
-            className="flex-1 border-0 bg-transparent text-sm tracking-[-0.1px] text-black outline-none placeholder:text-[rgba(0,0,0,0.28)]"
-            onBlur={() => setIsProjectNameFocused(false)}
-            onChange={(event) => setProjectName(event.target.value)}
-            onFocus={() => setIsProjectNameFocused(true)}
-            placeholder="예: 김치찌개 요리 브이로그"
-            type="text"
-            value={projectName}
-          />
-        </div>
-      </motion.div>
+      <UploadHeader projectFormat={initialProjectFormat} projectName={projectTitle} onLogoClick={onLogoClick} useEmptyStateDesign={useEmptyStateDesign} />
 
       <StepIndicator />
 

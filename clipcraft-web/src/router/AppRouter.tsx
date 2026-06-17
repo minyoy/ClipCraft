@@ -11,8 +11,18 @@ import { mockEditorAnalysis } from '@/mock/editorAnalysis';
 import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '@/types/app';
 
 function UploadRoute() {
+  const location = useLocation();
   const navigate = useNavigate();
-  return <UploadScreen onLogoClick={() => navigate('/')} onNext={(result) => navigate('/analyzing', { state: result })} />;
+  const routeState = location.state as { format?: string; projectName?: string } | null;
+
+  return (
+    <UploadScreen
+      initialProjectFormat={routeState?.format}
+      initialProjectName={routeState?.projectName}
+      onLogoClick={() => navigate('/')}
+      onNext={(result) => navigate('/analyzing', { state: result })}
+    />
+  );
 }
 
 function AnalyzingRoute() {
@@ -51,7 +61,7 @@ function AuthRoute() {
 
 function ProjectsRoute() {
   const navigate = useNavigate();
-  return <ProjectsScreen onLogoClick={() => navigate('/')} onStartNewProject={() => navigate('/upload')} />;
+  return <ProjectsScreen onLogoClick={() => navigate('/')} onStartNewProject={(project) => navigate('/upload', { state: project })} />;
 }
 
 export default function AppRouter() {
