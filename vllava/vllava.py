@@ -4,6 +4,7 @@ import av
 import numpy as np
 import os
 import re
+from PIL import Image  # 수정: 추가
 
 class VideoLLaVAVerifier:
     def __init__(self):
@@ -41,7 +42,9 @@ class VideoLLaVAVerifier:
         container.seek(0)
         for i, frame in enumerate(container.decode(video=0)):
             if i in indices:
-                frames.append(frame.to_ndarray(format="rgb24"))
+                img = frame.to_ndarray(format="rgb24")
+                img = np.array(Image.fromarray(img).resize((224, 224)))  # 수정: 프레임 크기 통일
+                frames.append(img)
         if len(frames) == 0:
             return None
         return np.stack(frames)
@@ -54,7 +57,7 @@ class VideoLLaVAVerifier:
             print("❌ [VLLaVA] 분석할 후보 클립 정보가 없습니다.")
             return 0.0, 0.0
         
-        # 1. 경로 설정: gpu_server에서 넘겨준 실제 경로를 우선 사용[cite: 1]
+        # 1. 경로 설정: gpu_server에서 넘겨준 실제 경로를 우선 사용
         target_dir = clip_folder if clip_folder else os.path.join("./output", scenario_text.replace(" ", "_"))
 
         best_idx = -1
@@ -84,6 +87,9 @@ class VideoLLaVAVerifier:
                 indices = np.arange(0, total_frames, max(1, total_frames / 12)).astype(int)
                 video_frames = self._read_video_pyav(container, indices)
 
+                video_frames = self._read_video_pyav(container, indices)
+                print(f"   => video_frames shape: {video_frames.shape}")
+                
                 if video_frames is None: 
                     continue
 
@@ -97,7 +103,7 @@ class VideoLLaVAVerifier:
                     "[Score] (Rate the relevance from 0 to 10 based on the evidence)\n"
                     "If the action is vague, give a low score. Respond strictly in the format. ASSISTANT:"
                 )
-                
+                # 수정: list() 제거
                 inputs = self.processor(text=prompt, videos=video_frames, return_tensors="pt").to(self.device)
                 if self.device == "cuda":
                     inputs = {k: v.to(torch.float16) if v.dtype == torch.float32 else v for k, v in inputs.items()}
@@ -105,6 +111,7 @@ class VideoLLaVAVerifier:
                 generate_ids = self.model.generate(**inputs, max_new_tokens=128)
                 answer = self.processor.batch_decode(generate_ids, skip_special_tokens=True)[0]
                 res_text = answer.split("ASSISTANT:")[-1].strip()
+                print(f"   => 원본 답변: {answer}")
 
                 # [Analysis] 섹션 추출 (지예님이 원하시는 '답변' 내용)
                 analysis_match = re.search(r"\[Analysis\](.*?)\[Score\]", res_text, re.DOTALL | re.IGNORECASE)
@@ -126,7 +133,7 @@ class VideoLLaVAVerifier:
                 print(f"⚠️ [VLLaVA] {clip_path} 분석 중 에러: {e}")
                 continue
 
-        # 3. 가장 높은 점수를 받은 클립의 원래 시간대 반환[cite: 1]
+        # 3. 가장 높은 점수를 받은 클립의 원래 시간대 반환
         if best_idx != -1:
             final_cand = candidates[best_idx]
             return {
@@ -136,4 +143,3 @@ class VideoLLaVAVerifier:
                 "best_idx": best_idx  # ★ 이 줄을 반드시 추가해야 gpu_server가 읽을 수 있습니다!
             }
         return 0.0, 0.0
-

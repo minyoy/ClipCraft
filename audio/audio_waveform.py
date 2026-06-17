@@ -10,7 +10,7 @@ FFPROBE_PATH = FFMPEG_PATH.replace("ffmpeg", "ffprobe")
 
 def _probe_duration(file_path: str) -> float:
     command = [
-        "FFPROBE_PATH",
+        FFPROBE_PATH,
         "-v",
         "error",
         "-show_entries",
@@ -29,7 +29,7 @@ def _probe_duration(file_path: str) -> float:
 
 def _load_audio_with_ffmpeg(file_path: str, sample_rate: int) -> tuple[np.ndarray, int]:
     command = [
-        "FFMPEG_PATH",
+        FFMPEG_PATH,
         "-v",
         "error",
         "-i",
