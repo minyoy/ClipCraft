@@ -56,7 +56,7 @@ function EditorRoute() {
 
 function AuthRoute() {
   const navigate = useNavigate();
-  return <AuthScreen onContinue={() => navigate('/projects')} onLogoClick={() => navigate('/')} />;
+  return <AuthScreen onContinue={() => navigate('/workspace')} onLogoClick={() => navigate('/')} />;
 }
 
 function ProjectsRoute() {
@@ -135,7 +135,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/projects"
+          path="/workspace"
           element={
             <motion.div
               className="min-h-screen"

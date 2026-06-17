@@ -185,7 +185,7 @@ export default function UploadFlow({ initialProjectFormat, initialProjectName, o
             disabled={!canStartEditing}
             className="px-10 py-3.5 [font-family:'Plus_Jakarta_Sans','Noto_Sans_KR',sans-serif] text-base font-bold tracking-[-0.3px]"
           >
-            영상 편집 시작하기
+            분석 시작하기
           </PillButton>
         </motion.div>
       </motion.div>
