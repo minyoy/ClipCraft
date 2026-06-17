@@ -377,6 +377,11 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
           <span className="text-[13px] text-[rgba(0,0,0,0.4)]">프로젝트:</span>
           <span className="text-[13px] font-[480] tracking-[-0.1px]">{projectName ?? videoName ?? '하이라이트 편집'}</span>
         </div>
+        {deletedSegmentIds.length > 0 && (
+          <span data-testid="hidden-segment-indicator" className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[11px] text-black/45">
+            숨김 {deletedSegmentIds.length}
+          </span>
+        )}
         <div className="flex-1" />
         <PillButton variant="white" icon="history" small>
           작업 기록

@@ -16,7 +16,7 @@ export default function ProjectsPageHeader({ count, onNewProject }: ProjectsPage
           작업 중인 영상을 이어서 편집하고, 새 프로젝트를 시작해보세요.
         </p>
       </div>
-      <PillButton icon="plus" onClick={onNewProject} variant="accent">
+      <PillButton icon="plus" onClick={onNewProject} testId="new-project-button" variant="accent">
         새 프로젝트
       </PillButton>
     </div>

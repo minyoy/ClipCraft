@@ -61,6 +61,7 @@ export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
           autoFocus
           error={errors.email}
           icon="mail"
+          inputTestId="email-input"
           label="이메일"
           onBlur={() => {
             if (email && !isValidEmail(email)) {
@@ -79,6 +80,7 @@ export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
           autoComplete="current-password"
           error={errors.password}
           icon="lock"
+          inputTestId="password-input"
           label="비밀번호"
           onChange={(value) => {
             setPassword(value);
@@ -109,7 +111,7 @@ export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
         </button>
       </div>
 
-      <PillButton fullWidth loading={loading} type="submit" variant="black" className="mt-1 py-[13px] text-[14.5px] font-[520]">
+      <PillButton fullWidth loading={loading} testId="login-submit-button" type="submit" variant="black" className="mt-1 py-[13px] text-[14.5px] font-[520]">
         {loading ? '로그인 중...' : '로그인'}
       </PillButton>
 

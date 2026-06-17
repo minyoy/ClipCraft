@@ -10,6 +10,7 @@ export interface PillButtonProps {
   icon?: IconName | null;
   iconRight?: IconName | null;
   className?: string;
+  testId?: string;
   style?: CSSProperties;
   small?: boolean;
   accentOverride?: string;

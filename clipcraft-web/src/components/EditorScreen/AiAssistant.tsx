@@ -177,6 +177,7 @@ export default function AiAssistant({ accent, onApplyCommand }: AiAssistantProps
       <div className="border-t border-[rgba(0,0,0,0.08)] px-3.5 py-2.5">
         <div className="flex items-center gap-2 rounded-full border border-[rgba(0,0,0,0.12)] py-[7px] pr-[7px] pl-3.5">
           <input
+            data-testid="chat-input"
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') sendMessage();
@@ -185,7 +186,7 @@ export default function AiAssistant({ accent, onApplyCommand }: AiAssistantProps
             className="flex-1 border-0 bg-transparent text-[12.5px] outline-none"
             value={draft}
           />
-          <button className="flex h-7 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[11.5px] font-[540] text-white" onClick={sendMessage} style={{ background: accent }} type="button">
+          <button data-testid="chat-send-button" className="flex h-7 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[11.5px] font-[540] text-white" onClick={sendMessage} style={{ background: accent }} type="button">
             <Icon d={icons.send} size={11} stroke="#fff" />
           </button>
         </div>

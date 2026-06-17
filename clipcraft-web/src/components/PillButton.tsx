@@ -12,6 +12,7 @@ export default function PillButton({
   icon,
   iconRight,
   className,
+  testId,
   style = {},
   small = false,
   accentOverride,
@@ -52,6 +53,7 @@ export default function PillButton({
         small ? 'px-4 py-[7px] text-[13px]' : 'px-[22px] py-2.5 text-[14.5px]',
         className,
       )}
+      data-testid={testId}
       disabled={disabled || loading}
       onClick={disabled || loading ? undefined : onClick}
       onMouseEnter={() => {

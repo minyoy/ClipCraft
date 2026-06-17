@@ -30,13 +30,14 @@ export default function UploadHeader({ onLogoClick, projectFormat, projectName, 
         <motion.div className="mb-4 flex items-center justify-center gap-2.5 will-change-[transform,opacity]" variants={fadeInUp}>
           <MonoLabel>AI Video Editor</MonoLabel>
           {projectFormatLabel && (
-            <span className="inline-flex rounded-full border border-black/[0.08] bg-black/[0.035] px-2.5 py-0.5 font-mono text-[10.5px] tracking-[0.2px] text-black/42">
+            <span data-testid="project-aspect-ratio" className="inline-flex rounded-full border border-black/[0.08] bg-black/[0.035] px-2.5 py-0.5 font-mono text-[10.5px] tracking-[0.2px] text-black/42">
               {projectFormatLabel}
             </span>
           )}
         </motion.div>
         <motion.h1
           className="leading-[1.08] will-change-[transform,opacity] mb-[18px] text-[52px] font-semibold tracking-[-1.2px] max-[760px]:text-[40px]"
+          data-testid="project-title"
           variants={fadeInUp}
         >
           {projectName}

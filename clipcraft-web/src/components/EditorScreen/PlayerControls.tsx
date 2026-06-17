@@ -41,6 +41,7 @@ export default function PlayerControls({
       <div className="flex shrink-0 items-center gap-2 pt-3.5">
         <button
           onClick={() => setPlaying(!playing)}
+          data-testid="play-button"
           className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full border-0"
           style={{ background: accent }}
           type="button"
@@ -49,7 +50,8 @@ export default function PlayerControls({
         </button>
         <RoundIconButton ariaLabel="10초 뒤로 이동" icon="skip" onClick={onSeekForward} />
         <RoundIconButton active={!muted} ariaLabel={muted ? '소리 켜기' : '소리 끄기'} icon={muted ? 'volOff' : 'vol'} onClick={onToggleMute} />
-        <span className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{formatSeconds(progress * duration)} / {formatSeconds(duration)}</span>
+        <span data-testid="mute-indicator" className="sr-only">{muted ? 'muted' : 'unmuted'}</span>
+        <span data-testid="player-time" className="font-mono text-[11px] text-[rgba(0,0,0,0.38)]">{formatSeconds(progress * duration)} / {formatSeconds(duration)}</span>
       </div>
 
       <div

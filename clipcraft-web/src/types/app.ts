@@ -13,9 +13,11 @@ export interface ScenarioItem {
 }
 
 export interface HighlightSegment {
+  score?: number;
   scenario: string;
   start: number;
   end: number;
+  title?: string;
 }
 
 export interface EditorHighlightSegment extends HighlightSegment {

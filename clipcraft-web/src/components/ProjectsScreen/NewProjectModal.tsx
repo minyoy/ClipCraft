@@ -52,6 +52,7 @@ export default function NewProjectModal({ onCancel, onCreate }: NewProjectModalP
           <MonoLabel className="mb-2 block">프로젝트 이름</MonoLabel>
           <input
             className="w-full rounded-[10px] border-[1.5px] border-[rgba(0,0,0,0.12)] px-3.5 py-3 text-sm tracking-[-0.1px] outline-none transition-colors focus:border-[var(--project-accent)]"
+            data-testid="project-name-input"
             onChange={(event) => setName(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && canCreate) onCreate({ name: name.trim(), format });
@@ -71,6 +72,7 @@ export default function NewProjectModal({ onCancel, onCreate }: NewProjectModalP
               return (
                 <button
                   className="min-h-[118px] flex-1 cursor-pointer rounded-[10px] border-[1.5px] px-2.5 py-5 text-center transition-all"
+                  data-testid="aspect-ratio-select"
                   key={item.value}
                   onClick={() => setFormat(item.value)}
                   style={{
@@ -103,7 +105,7 @@ export default function NewProjectModal({ onCancel, onCreate }: NewProjectModalP
           <PillButton onClick={onCancel} small variant="glass">
             취소
           </PillButton>
-          <PillButton disabled={!canCreate} icon="plus" onClick={() => onCreate({ name: name.trim(), format })} small variant="black">
+          <PillButton disabled={!canCreate} icon="plus" onClick={() => onCreate({ name: name.trim(), format })} small testId="start-editing-button" variant="black">
             편집 시작하기
           </PillButton>
         </div>

@@ -6,4 +6,5 @@
 .venv/
 __pycache__/
 *.mp4
+!clipcraft-web/e2e/fixtures/sample.mp4
 clip_search/clips/

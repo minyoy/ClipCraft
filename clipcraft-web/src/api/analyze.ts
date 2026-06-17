@@ -14,8 +14,10 @@ export interface AnalyzeResultItem {
   project_name: string;
   id: number;
   scenario: string;
+  score?: number;
   start: number;
   end: number;
+  title?: string;
   audio: {
     duration: number;
     barCount: number;
@@ -70,8 +72,10 @@ export function normalizeAnalyzeResponse(items: AnalyzeResultItem[]): HighlightA
     id: segmentId++,
     sourceId: item.id,
     scenario: item.scenario,
+    score: item.score,
     start: item.start,
     end: item.end,
+    title: item.title,
   }));
 
   return {
