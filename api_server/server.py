@@ -122,6 +122,8 @@ def add_job_log(job_id: str, message: str):
         job["updated_at"] = time.time()
 
 def run_analysis(request: AnalysisRequest, job_id: str | None = None):
+    request.video_path = "/home/CC_project/ClipCraft/example.mov"  # 임시 고정
+    print(f"video_path: {request.video_path}")
     final_results = []
 
     if job_id:
@@ -152,6 +154,8 @@ def run_analysis(request: AnalysisRequest, job_id: str | None = None):
             project_name=safe_project,
             scenario_folder_name=scenario_folder_name,
         )
+        print(f"pipeline_result keys: {pipeline_result.keys() if isinstance(pipeline_result, dict) else 'list'}")
+        print(f"pipeline_result: {pipeline_result}")
 
         if job_id:
             update_job(
