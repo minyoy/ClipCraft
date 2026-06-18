@@ -41,6 +41,10 @@ class AnalysisRequest(BaseModel):
     video_path: str
     scenarios: List[str]
 
+class ExportRequest(BaseModel):
+    video_path: str
+    segments: List[dict]  # [{"start": 0.0, "end": 10.0}, ...]
+
 class AnalysisJobStartResponse(BaseModel):
     status: str
     job_id: str
@@ -293,3 +297,39 @@ async def analyze(request: AnalysisRequest):
         "project": request.project_name,
         "results": final_results
     }
+
+@app.post("/export")
+async def export_video(request: ExportRequest):
+    import imageio_ffmpeg
+    import subprocess
+    from fastapi.responses import FileResponse
+    
+    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    temp_files = []
+    
+    try:
+        for i, seg in enumerate(request.segments):
+            temp_path = f"/tmp/clip_{i}.mp4"
+            subprocess.run([
+                ffmpeg, "-y", "-i", request.video_path,
+                "-ss", str(seg["start"]),
+                "-to", str(seg["end"]),
+                "-c", "copy", temp_path
+            ], check=True)
+            temp_files.append(temp_path)
+        
+        list_file = "/tmp/clips_list.txt"
+        with open(list_file, "w") as f:
+            for p in temp_files:
+                f.write(f"file '{p}'\n")
+        
+        output_path = "/tmp/output_final.mp4"
+        subprocess.run([
+            ffmpeg, "-y", "-f", "concat", "-safe", "0",
+            "-i", list_file, "-c", "copy", output_path
+        ], check=True)
+        
+        return FileResponse(output_path, media_type="video/mp4", filename="clipcraft_export.mp4")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
