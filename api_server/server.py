@@ -1,6 +1,11 @@
 import os
 import re
-import sys
+
+import sys 
+sys.path.insert(0, "/shareHost/jiyes/packages") #
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from vllava.vllava import VideoLLaVAVerifier #
+ 
 import threading
 import time
 import uuid
@@ -22,6 +27,7 @@ from audio.audio_waveform import extract_audio_waveform
 from pipeline import run_pipeline as run_clip_search_pipeline
 
 app = FastAPI()
+verifier = VideoLLaVAVerifier() #수정
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,6 +40,10 @@ class AnalysisRequest(BaseModel):
     project_name: str
     video_path: str
     scenarios: List[str]
+
+class ExportRequest(BaseModel):
+    video_path: str
+    segments: List[dict]  # [{"start": 0.0, "end": 10.0}, ...]
 
 class AnalysisJobStartResponse(BaseModel):
     status: str
@@ -116,6 +126,8 @@ def add_job_log(job_id: str, message: str):
         job["updated_at"] = time.time()
 
 def run_analysis(request: AnalysisRequest, job_id: str | None = None):
+    request.video_path = "/home/CC_project/ClipCraft/example.mov"  # 임시 고정
+    print(f"video_path: {request.video_path}")
     final_results = []
 
     if job_id:
@@ -146,6 +158,8 @@ def run_analysis(request: AnalysisRequest, job_id: str | None = None):
             project_name=safe_project,
             scenario_folder_name=scenario_folder_name,
         )
+        print(f"pipeline_result keys: {pipeline_result.keys() if isinstance(pipeline_result, dict) else 'list'}")
+        print(f"pipeline_result: {pipeline_result}")
 
         if job_id:
             update_job(
@@ -158,8 +172,17 @@ def run_analysis(request: AnalysisRequest, job_id: str | None = None):
 
         segments = pipeline_result.get("segments", []) if isinstance(pipeline_result, dict) else pipeline_result
 
-        if segments:
-            best = segments[0]
+
+        if segments: # 수정
+            vllava_result = verifier.verify_timestamp(
+                video_path=request.video_path,
+                scenario_text=query,
+                candidates=segments,
+            )
+            if isinstance(vllava_result, dict):
+                best = segments[vllava_result.get("best_idx", 0)]
+            else:
+                best = segments[0] #
 
             if job_id:
                 update_job(
@@ -214,6 +237,9 @@ def run_analysis_job(job_id: str, request: AnalysisRequest):
     try:
         run_analysis(request, job_id=job_id)
     except Exception as error:
+        print(f"❌ 에러 발생: {error}")
+        import traceback
+        traceback.print_exc()
         update_job(
             job_id,
             status="error",
@@ -271,3 +297,39 @@ async def analyze(request: AnalysisRequest):
         "project": request.project_name,
         "results": final_results
     }
+
+@app.post("/export")
+async def export_video(request: ExportRequest):
+    import imageio_ffmpeg
+    import subprocess
+    from fastapi.responses import FileResponse
+    
+    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    temp_files = []
+    
+    try:
+        for i, seg in enumerate(request.segments):
+            temp_path = f"/tmp/clip_{i}.mp4"
+            subprocess.run([
+                ffmpeg, "-y", "-i", request.video_path,
+                "-ss", str(seg["start"]),
+                "-to", str(seg["end"]),
+                "-c", "copy", temp_path
+            ], check=True)
+            temp_files.append(temp_path)
+        
+        list_file = "/tmp/clips_list.txt"
+        with open(list_file, "w") as f:
+            for p in temp_files:
+                f.write(f"file '{p}'\n")
+        
+        output_path = "/tmp/output_final.mp4"
+        subprocess.run([
+            ffmpeg, "-y", "-f", "concat", "-safe", "0",
+            "-i", list_file, "-c", "copy", output_path
+        ], check=True)
+        
+        return FileResponse(output_path, media_type="video/mp4", filename="clipcraft_export.mp4")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

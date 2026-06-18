@@ -3,11 +3,14 @@
 import json
 import subprocess
 import numpy as np
+import imageio_ffmpeg
 
+FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
+FFPROBE_PATH = FFMPEG_PATH.replace("ffmpeg", "ffprobe")
 
 def _probe_duration(file_path: str) -> float:
     command = [
-        "ffprobe",
+        FFPROBE_PATH,
         "-v",
         "error",
         "-show_entries",
@@ -26,7 +29,7 @@ def _probe_duration(file_path: str) -> float:
 
 def _load_audio_with_ffmpeg(file_path: str, sample_rate: int) -> tuple[np.ndarray, int]:
     command = [
-        "ffmpeg",
+        FFMPEG_PATH,
         "-v",
         "error",
         "-i",
