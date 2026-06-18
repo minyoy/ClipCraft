@@ -117,6 +117,7 @@ export default function UploadFlow({ initialProjectFormat, initialProjectName, o
       file: uploadedVideo.file,
       projectName: initialProjectName?.trim() || uploadedVideo.fileName.replace(/\.[^/.]+$/, '') || uploadedVideo.fileName,
       scenarios: items,
+      videoPath: '',
       videoUrl: uploadedVideo.objectUrl,
       videoName: uploadedVideo.fileName,
     });

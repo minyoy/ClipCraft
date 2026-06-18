@@ -15,6 +15,7 @@ export default defineConfig({
     allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev'],
     proxy: {
       '/analyze': process.env.VITE_BACKEND_URL ?? 'http://localhost:8000',
+      '/export': process.env.VITE_BACKEND_URL ?? 'http://localhost:8000',
     },
   },
 });

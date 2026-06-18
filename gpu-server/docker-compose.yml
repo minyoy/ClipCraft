@@ -1,0 +1,16 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: api_server/Dockerfile
+    environment:
+      CLIP_SEARCH_OUTPUT_ROOT: /app/clip_search/clips
+      CLIP_SEARCH_FPS: "0.5"
+      CLIP_SEARCH_BATCH_SIZE: "32"
+      CLIP_SEARCH_MODEL: ViT-L/14
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./clip_search:/app/clip_search
+      - ./audio:/app/audio
