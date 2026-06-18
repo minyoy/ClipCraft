@@ -12,6 +12,7 @@ import uuid
 import json
 import tempfile
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+import shutil
 from pydantic import BaseModel
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
