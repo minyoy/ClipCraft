@@ -2,10 +2,10 @@ FROM node:22-slim
 
 WORKDIR /app
 
-COPY clipcraft-web/package*.json ./
+COPY package*.json ./
 RUN npm ci
 
-COPY clipcraft-web ./
+COPY . ./
 
 EXPOSE 5173
 

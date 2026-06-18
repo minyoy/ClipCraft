@@ -47,6 +47,7 @@ export interface HighlightAnalysisData {
 
 export interface HighlightAnalysisResult extends HighlightAnalysisData {
   projectName?: string;
+  videoPath?: string;
   videoUrl?: string;
   videoName?: string;
 }
@@ -55,6 +56,7 @@ export interface PendingHighlightAnalysis {
   file: File;
   projectName: string;
   scenarios: ScenarioItem[];
+  videoPath: string;
   videoUrl: string;
   videoName: string;
 }

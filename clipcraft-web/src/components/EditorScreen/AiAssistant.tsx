@@ -4,37 +4,9 @@ import { icons } from '@/components/icons';
 import type { EditChatMessage } from '@/types/app';
 import type { AiAssistantProps } from '@/types/pages/EditorScreen';
 
-const EDIT_CHAT_HISTORY_KEY = 'editor-edit-chat-history';
-
 type DisplayEditChatMessage = EditChatMessage & {
   pending?: boolean;
 };
-
-function isEditChatMessage(value: unknown): value is EditChatMessage {
-  if (!value || typeof value !== 'object') return false;
-
-  const message = value as Partial<EditChatMessage>;
-  return (
-    typeof message.id === 'number' &&
-    (message.role === 'user' || message.role === 'system') &&
-    typeof message.content === 'string' &&
-    typeof message.createdAt === 'string'
-  );
-}
-
-function loadEditChatHistory(): EditChatMessage[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    const saved = window.localStorage.getItem(EDIT_CHAT_HISTORY_KEY);
-    if (!saved) return [];
-
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) && parsed.every(isEditChatMessage) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 function formatMessageTime(createdAt: string): string {
   const date = new Date(createdAt);
@@ -45,22 +17,9 @@ function formatMessageTime(createdAt: string): string {
 
 export default function AiAssistant({ accent, onApplyCommand }: AiAssistantProps) {
   const [draft, setDraft] = useState('');
-  const [messages, setMessages] = useState<DisplayEditChatMessage[]>(loadEditChatHistory);
+  const [messages, setMessages] = useState<DisplayEditChatMessage[]>([]);
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const responseTimersRef = useRef<number[]>([]);
-
-  useEffect(() => {
-    try {
-      if (messages.length === 0) {
-        window.localStorage.removeItem(EDIT_CHAT_HISTORY_KEY);
-        return;
-      }
-
-      window.localStorage.setItem(EDIT_CHAT_HISTORY_KEY, JSON.stringify(messages.filter((message) => !message.pending)));
-    } catch {
-      // localStorage availability can vary by browser settings.
-    }
-  }, [messages]);
 
   useEffect(() => {
     const chatScroll = chatScrollRef.current;
@@ -111,7 +70,6 @@ export default function AiAssistant({ accent, onApplyCommand }: AiAssistantProps
   const clearHistory = () => {
     responseTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
     responseTimersRef.current = [];
-    window.localStorage.removeItem(EDIT_CHAT_HISTORY_KEY);
     setMessages([]);
   };
 

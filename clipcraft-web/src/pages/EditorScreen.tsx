@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { downloadExportedVideo, requestExportVideo } from '@/api/export';
 import { useTheme } from '@/App';
 import Logo from '@/components/Logo';
 import PillButton from '@/components/PillButton';
@@ -33,6 +34,15 @@ function filterStoredEditSettings(settings: SegmentEditSetting[], segments: Edit
   const segmentIds = new Set(segments.map((segment) => segment.id));
   const deletedIds = new Set(deletedSegmentIds);
   return settings.filter((setting) => segmentIds.has(setting.segmentId) && !deletedIds.has(setting.segmentId));
+}
+
+function moveSegment(segments: EditorHighlightSegment[], fromIndex: number, toIndex: number): EditorHighlightSegment[] {
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= segments.length || toIndex >= segments.length) return segments;
+
+  const next = [...segments];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
 }
 
 interface CapturedFrame {
@@ -151,7 +161,7 @@ async function captureSegmentThumbnail(videoUrl: string, start: number, end: num
   return bestFrame?.url ?? '';
 }
 
-export default function EditorWorkspace({ analysis, onBack, projectName, videoName, videoUrl }: EditorScreenProps) {
+export default function EditorWorkspace({ analysis, onBack, projectName, videoPath, videoName, videoUrl }: EditorScreenProps) {
   const { accent } = useTheme();
   const [deletedSegmentIds, setDeletedSegmentIds] = useState<number[]>(loadDeletedSegmentIds);
   const [segments, setSegments] = useState<EditorHighlightSegment[]>(() => filterDeletedSegments(analysis?.segments ?? [], loadDeletedSegmentIds()));
@@ -168,8 +178,16 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
     filterStoredEditSettings(loadSegmentEditSettings(), analysis?.segments ?? [], loadDeletedSegmentIds()),
   );
   const [segmentThumbnails, setSegmentThumbnails] = useState<Record<number, string>>({});
+  const [exportToast, setExportToast] = useState<string | null>(null);
   const scrubberRef = useRef<HTMLDivElement>(null);
+  const exportToastTimerRef = useRef<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (exportToastTimerRef.current !== null) window.clearTimeout(exportToastTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const sourceSegments = analysis?.segments ?? [];
@@ -313,6 +331,21 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
     );
   };
 
+  const onSegmentsReorder = (fromIndex: number, toIndex: number) => {
+    const activeSegmentId = activeSegment !== null ? segments[activeSegment]?.id : null;
+
+    setSegments((current) => {
+      const next = moveSegment(current, fromIndex, toIndex);
+
+      if (activeSegmentId !== null) {
+        const nextActiveIndex = next.findIndex((segment) => segment.id === activeSegmentId);
+        setActiveSegment(nextActiveIndex === -1 ? null : nextActiveIndex);
+      }
+
+      return next;
+    });
+  };
+
   const syncVideoProgress = () => {
     const video = videoRef.current;
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
@@ -341,12 +374,32 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
     setProgress((current) => Math.min(1, current + 10 / playbackDuration));
   };
 
-  const onExport = () => {
+  const showExportToast = (message: string) => {
+    if (exportToastTimerRef.current !== null) window.clearTimeout(exportToastTimerRef.current);
+
+    setExportToast(message);
+    exportToastTimerRef.current = window.setTimeout(() => {
+      setExportToast(null);
+      exportToastTimerRef.current = null;
+    }, 3200);
+  };
+
+  const onExport = async () => {
     if (exportState !== 'idle') return;
+    if (!videoPath || segments.length === 0) return;
 
     setExportState('loading');
-    window.setTimeout(() => setExportState('done'), 2200);
-    window.setTimeout(() => setExportState('idle'), 4000);
+    try {
+      const blob = await requestExportVideo(videoPath, segments, segmentEditSettings);
+      downloadExportedVideo(blob);
+      setExportState('done');
+      showExportToast('내보내기가 완료됐어요');
+      window.setTimeout(() => setExportState('idle'), 1800);
+    } catch (error) {
+      console.error(error);
+      setExportState('idle');
+      showExportToast('내보내기에 실패했습니다. 백엔드 서버와 영상 경로를 확인해 주세요.');
+    }
   };
 
   const applyNaturalLanguageCommand = (command: string): NaturalLanguageCommandResult => {
@@ -377,21 +430,18 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
           <span className="text-[13px] text-[rgba(0,0,0,0.4)]">프로젝트:</span>
           <span className="text-[13px] font-[480] tracking-[-0.1px]">{projectName ?? videoName ?? '하이라이트 편집'}</span>
         </div>
-        {deletedSegmentIds.length > 0 && (
-          <span data-testid="hidden-segment-indicator" className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[11px] text-black/45">
-            숨김 {deletedSegmentIds.length}
-          </span>
-        )}
         <div className="flex-1" />
         <PillButton variant="white" icon="history" small>
           작업 기록
         </PillButton>
         <PillButton
           variant="accent"
-          icon={exportState === 'loading' ? null : exportState === 'done' ? 'check' : 'download'}
+          disabled={!videoPath || segments.length === 0}
+          icon={exportState === 'done' ? 'check' : 'download'}
+          loading={exportState === 'loading'}
           small
           onClick={onExport}
-          style={{ opacity: exportState === 'loading' ? 0.7 : 1, transition: 'all 0.3s' }}
+          style={{ transition: 'all 0.3s' }}
         >
           {exportState === 'loading' ? '내보내는 중...' : exportState === 'done' ? '완료!' : 'MP4로 내보내기'}
         </PillButton>
@@ -435,6 +485,7 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
         <HighlightList
           activeSegment={activeSegment}
           onSegmentClick={onSegmentClick}
+          onSegmentsReorder={onSegmentsReorder}
           segmentEditSettings={segmentEditSettings}
           segments={segments}
           thumbnails={segmentThumbnails}
@@ -442,6 +493,13 @@ export default function EditorWorkspace({ analysis, onBack, projectName, videoNa
       </section>
 
       <AiAssistant accent={accent} onApplyCommand={applyNaturalLanguageCommand} />
+
+      {exportToast && (
+        <div className="fixed bottom-7 left-1/2 z-[2000] flex -translate-x-1/2 animate-[fadeIn_0.2s_ease] items-center gap-2.5 rounded-full bg-[#0a0a0a] px-[18px] py-3 text-[13.5px] font-[480] tracking-[-0.1px] text-white shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+          <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white text-[11px] font-bold text-black">✓</span>
+          {exportToast}
+        </div>
+      )}
     </div>
   );
 }

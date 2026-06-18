@@ -97,6 +97,7 @@ export default function AnalyzingScreen({ request, onDone, onBack }: AnalyzingSc
                 onDoneRef.current({
                   ...normalizeAnalyzeResponse(job.results),
                   projectName: job.project,
+                  videoPath: job.video_path ?? request.videoPath,
                   videoUrl: request.videoUrl,
                   videoName: request.videoName,
                 });

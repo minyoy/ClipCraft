@@ -2,11 +2,9 @@ import { ApiError, getApiUrl, requestJson, requestStatusJson } from '@/api/clien
 import type { HighlightAnalysisData, ScenarioItem } from '@/types/app';
 
 const DEFAULT_ANALYZE_API_URL = '/analyze';
-const DEFAULT_LOCAL_VIDEO_BASE_PATH = '/app/clip_search/';
 
 export interface AnalyzeRequestBody {
   project_name: string;
-  video_path: string;
   scenarios: string[];
 }
 
@@ -40,25 +38,11 @@ export interface AnalyzeJobStatus {
   project: string;
   results: AnalyzeResultItem[];
   error?: string | null;
+  video_path?: string | null;
 }
 
-type FileWithPath = File & {
-  path?: string;
-  webkitRelativePath?: string;
-};
-
-function buildVideoPath(file: File): string {
-  const fileWithPath = file as FileWithPath;
-  const basePath = import.meta.env.VITE_LOCAL_VIDEO_BASE_PATH || DEFAULT_LOCAL_VIDEO_BASE_PATH;
-  return fileWithPath.path || fileWithPath.webkitRelativePath || `${basePath}${file.name}`;
-}
-
-function buildAnalyzeRequestBody(file: File, scenarios: ScenarioItem[], projectName?: string): AnalyzeRequestBody {
-  return {
-    project_name: projectName?.trim() || file.name.replace(/\.[^/.]+$/, '') || file.name,
-    video_path: buildVideoPath(file),
-    scenarios: scenarios.map((item) => item.ko),
-  };
+function buildProjectName(file: File, projectName?: string): string {
+  return projectName?.trim() || file.name.replace(/\.[^/.]+$/, '') || file.name;
 }
 
 function getAnalyzeEndpoint(): string {
@@ -86,33 +70,18 @@ export function normalizeAnalyzeResponse(items: AnalyzeResultItem[]): HighlightA
   };
 }
 
-export async function requestAnalyze(file: File, scenarios: ScenarioItem[], projectName?: string): Promise<HighlightAnalysisData & { projectName?: string }> {
-  const endpoint = getAnalyzeEndpoint();
-  const body = buildAnalyzeRequestBody(file, scenarios, projectName);
-
-  const response = await requestStatusJson<AnalyzeResultItem[]>(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  return {
-    ...normalizeAnalyzeResponse(response.results),
-    projectName: response.project,
-  };
-}
 
 export async function startAnalyzeJob(file: File, scenarios: ScenarioItem[], projectName?: string): Promise<AnalyzeJobStartResponse> {
   const endpoint = `${getAnalyzeEndpoint()}/jobs`;
 
+  const formData = new FormData();
+  formData.append('video', file, file.name);
+  formData.append('project_name', buildProjectName(file, projectName));
+  formData.append('scenarios', JSON.stringify(scenarios.map((item) => item.ko)));
+
   return requestJson<AnalyzeJobStartResponse>(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(buildAnalyzeRequestBody(file, scenarios, projectName)),
+    body: formData,
   });
 }
 

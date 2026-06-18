@@ -6,6 +6,7 @@ export interface EditorScreenProps {
   onBack: () => void;
   analysis?: HighlightAnalysisData;
   projectName?: string;
+  videoPath?: string;
   videoUrl?: string;
   videoName?: string;
 }
@@ -39,6 +40,7 @@ export interface WaveformTimelineProps {
 export interface HighlightListProps {
   activeSegment: number | null;
   onSegmentClick: (index: number) => void;
+  onSegmentsReorder: (fromIndex: number, toIndex: number) => void;
   segmentEditSettings: SegmentEditSetting[];
   segments: EditorHighlightSegment[];
   thumbnails: Record<number, string>;

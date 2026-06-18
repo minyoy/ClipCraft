@@ -7,7 +7,6 @@ import LandingScreen from '@/pages/LandingScreen';
 import ProjectsScreen from '@/pages/ProjectsScreen';
 import UploadScreen from '@/pages/UploadScreen';
 import { pageTransition } from '@/lib/animations';
-import { mockEditorAnalysis } from '@/mock/editorAnalysis';
 import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '@/types/app';
 
 function UploadRoute() {
@@ -38,17 +37,17 @@ function AnalyzingRoute() {
 function EditorRoute() {
   const location = useLocation();
   const navigate = useNavigate();
-  const routeState = location.state as HighlightAnalysisResult | null;
-  const analysisResult = routeState ?? mockEditorAnalysis;
+  const analysisResult = location.state as HighlightAnalysisResult | null;
 
-    if (!analysisResult.segments?.length) return <Navigate to="/upload" replace />;
+  if (!analysisResult?.segments?.length) return <Navigate to="/upload" replace />;
 
   return (
     <EditorScreen
       analysis={analysisResult}
-      projectName={analysisResult.projectName}
-      videoName={analysisResult.videoName}
-      videoUrl={analysisResult.videoUrl}
+      projectName={analysisResult?.projectName}
+      videoPath={analysisResult?.videoPath}
+      videoName={analysisResult?.videoName}
+      videoUrl={analysisResult?.videoUrl}
       onBack={() => navigate('/upload')}
     />
   );
