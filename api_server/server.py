@@ -9,7 +9,8 @@ from vllava.vllava import VideoLLaVAVerifier #
 import threading
 import time
 import uuid
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
+import shutil
 from pydantic import BaseModel
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
@@ -126,7 +127,7 @@ def add_job_log(job_id: str, message: str):
         job["updated_at"] = time.time()
 
 def run_analysis(request: AnalysisRequest, job_id: str | None = None):
-    request.video_path = "/home/CC_project/ClipCraft/example.mov"  # 임시 고정
+    request.video_path = "/home/CC_project/ClipCraft/salmonsand.mp4"  # 임시 고정
     print(f"video_path: {request.video_path}")
     final_results = []
 
