@@ -1,4 +1,4 @@
-import { ApiError, getApiUrl, requestJson, requestStatusJson } from '@/api/client';
+import { ApiError, getApiUrl, requestJson } from '@/api/client';
 import type { HighlightAnalysisData, ScenarioItem } from '@/types/app';
 
 const DEFAULT_ANALYZE_API_URL = '/analyze';
