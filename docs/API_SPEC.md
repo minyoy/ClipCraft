@@ -2,7 +2,7 @@
 
 > 문서 버전: 1.0.0  
 > 기준일: 2026-08-11  
-> 기준 코드: `clipcraft-web/src` 및 `gpu-server/api_server/server.py`
+> 기준 코드: `clipcraft-web/src`, `backend/server.py` 및 `gpu-server/server.py`
 
 ## 1. 문서 목적
 

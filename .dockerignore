@@ -8,4 +8,4 @@
 clipcraft-web/dist
 clip_search/clips
 .clip_cache
-api_server/.clip_cache
+backend/.clip_cache

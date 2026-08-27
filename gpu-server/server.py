@@ -2,9 +2,9 @@ import os
 import re
 import shutil
 
-import sys 
-sys.path.insert(0, "/shareHost/jiyes/packages") #
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import sys
+sys.path.insert(0, "/shareHost/jiyes/packages")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
  
 import threading
 import time
@@ -17,9 +17,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 
-# [중요] 프로젝트 루트 경로를 시스템 경로에 추가 (orchestration, services 등을 찾기 위함)
-current_dir = os.path.dirname(os.path.abspath(__file__)) # api_server 폴더
-project_root = os.path.dirname(current_dir)             # ClipCraft 폴더
+# GPU 서비스 루트 경로를 시스템 경로에 추가합니다.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = current_dir
 clip_search_dir = os.path.join(project_root, "clip_search")
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
