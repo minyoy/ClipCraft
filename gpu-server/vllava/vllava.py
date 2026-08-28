@@ -12,7 +12,7 @@ class VideoLLaVAVerifier:
         모델 로드 및 초기화 (GPU 서버 환경 반영)
         """
         self.model_id = "LanguageBind/Video-LLaVA-7B-hf"
-        self.cache_path = "/shareHost/jiye_model"
+        self.cache_path = "/volfordoc/shareHost/jiye_model"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
         # GPU 메모리(VRAM) 최적화를 위한 4-bit 양자화 설정
