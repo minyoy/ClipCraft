@@ -3,7 +3,7 @@ import re
 import shutil
 
 import sys
-sys.path.insert(0, "/volfordoc/shareHost/jiyes/packages")
+sys.path.insert(0, "/shareHost/jiyes/packages")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
  
 import threading

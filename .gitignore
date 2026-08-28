@@ -3,7 +3,8 @@
 .env
 .env.local
 
-.venv/
+venv/
+*/venv/
 __pycache__/
 *.mp4
 !clipcraft-web/e2e/fixtures/sample.mp4
