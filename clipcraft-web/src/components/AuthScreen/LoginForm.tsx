@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useTheme } from '@/App';
+import { ApiV1Error } from '@/api/v1Client';
 import Icon from '@/components/Icon';
 import MonoLabel from '@/components/MonoLabel';
 import PillButton from '@/components/PillButton';
 import { icons } from '@/components/icons';
 import AuthField from '@/components/AuthScreen/AuthField';
+import { useAuth } from '@/lib/authContext';
 import { isValidEmail } from '@/lib/validation';
 
 interface LoginFormProps {
@@ -19,13 +21,14 @@ interface LoginErrors {
 
 export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
   const { accent } = useTheme();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
 
-  const submit = (event?: FormEvent<HTMLFormElement>) => {
+  const submit = async (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
     const nextErrors: LoginErrors = {};
 
@@ -37,10 +40,18 @@ export default function LoginForm({ onSubmit, onSwitch }: LoginFormProps) {
     if (Object.keys(nextErrors).length > 0) return;
 
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
+    try {
+      await login(email, password, remember);
       onSubmit();
-    }, 900);
+    } catch (error) {
+      if (error instanceof ApiV1Error && error.code === 'INVALID_CREDENTIALS') {
+        setErrors({ password: '이메일 또는 비밀번호가 올바르지 않습니다' });
+      } else {
+        setErrors({ password: '로그인에 실패했어요. 잠시 후 다시 시도해주세요.' });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

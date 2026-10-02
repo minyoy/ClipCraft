@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/analyze': backendUrl,
         '/export': backendUrl,
+        '/api': backendUrl,
       },
     },
   };

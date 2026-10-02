@@ -16,6 +16,7 @@ export interface ProjectItem {
   status: ProjectStatus;
   title: string;
   updated: string;
+  version: number;
 }
 
 export interface ProjectActionHandlers {

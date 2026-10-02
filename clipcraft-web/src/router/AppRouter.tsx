@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import AnalyzingScreen from '@/pages/AnalyzingScreen';
@@ -7,7 +8,18 @@ import LandingScreen from '@/pages/LandingScreen';
 import ProjectsScreen from '@/pages/ProjectsScreen';
 import UploadScreen from '@/pages/UploadScreen';
 import { pageTransition } from '@/lib/animations';
+import { useAuth } from '@/lib/authContext';
 import type { HighlightAnalysisResult, PendingHighlightAnalysis } from '@/types/app';
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { loading, user } = useAuth();
+  const location = useLocation();
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" replace state={{ from: location }} />;
+
+  return children;
+}
 
 function UploadRoute() {
   const location = useLocation();
@@ -87,7 +99,9 @@ export default function AppRouter() {
           path="/upload"
           element={
             <motion.div className="min-h-screen" initial="hidden" animate="visible" exit="exit" variants={pageTransition}>
-              <UploadRoute />
+              <RequireAuth>
+                <UploadRoute />
+              </RequireAuth>
             </motion.div>
           }
         />
@@ -101,7 +115,9 @@ export default function AppRouter() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <AnalyzingRoute />
+              <RequireAuth>
+                <AnalyzingRoute />
+              </RequireAuth>
             </motion.div>
           }
         />
@@ -115,7 +131,9 @@ export default function AppRouter() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.4, ease: 'easeInOut' }}
             >
-              <EditorRoute />
+              <RequireAuth>
+                <EditorRoute />
+              </RequireAuth>
             </motion.div>
           }
         />
@@ -129,7 +147,9 @@ export default function AppRouter() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.4, ease: 'easeInOut' }}
             >
-              <EditorRoute />
+              <RequireAuth>
+                <EditorRoute />
+              </RequireAuth>
             </motion.div>
           }
         />
@@ -171,7 +191,9 @@ export default function AppRouter() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <ProjectsRoute />
+              <RequireAuth>
+                <ProjectsRoute />
+              </RequireAuth>
             </motion.div>
           }
         />

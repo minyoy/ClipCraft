@@ -42,6 +42,7 @@ export const icons = {
   close: 'M18 6L6 18M6 6l12 12',
   archive: 'M21 8v13H3V8M1 3h22v5H1zM10 12h4',
   star: 'M12 2l3.1 6.3 7 1-5 4.9 1.2 7L12 17.8 5.7 21.2 7 14.2 2 9.3l7-1z',
+  logout: 'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',
 } as const;
 
 export type IconName = keyof typeof icons;

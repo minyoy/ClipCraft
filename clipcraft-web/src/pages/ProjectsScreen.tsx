@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createProject as createProjectRequest, deleteProject as deleteProjectRequest, duplicateProject as duplicateProjectRequest, listProjects, patchProject, restoreProject as restoreProjectRequest } from '@/api/projects';
 import DeleteProjectModal from '@/components/ProjectsScreen/DeleteProjectModal';
 import EmptySearchState from '@/components/ProjectsScreen/EmptySearchState';
 import NewProjectCard from '@/components/ProjectsScreen/NewProjectCard';
@@ -10,7 +11,8 @@ import ProjectsToolbar from '@/components/ProjectsScreen/ProjectsToolbar';
 import ProjectsTopNav from '@/components/ProjectsScreen/ProjectsTopNav';
 import RenameProjectModal from '@/components/ProjectsScreen/RenameProjectModal';
 import Toast from '@/components/ProjectsScreen/Toast';
-import { initialProjects, projectPalettes } from '@/components/ProjectsScreen/projectData';
+import { useAuth } from '@/lib/authContext';
+import { toProjectItem } from '@/lib/projectMapping';
 import type { ProjectItem, ProjectSort, ProjectsView, ToastState } from '@/types/pages/ProjectsScreen';
 
 interface ProjectsScreenProps {
@@ -19,7 +21,9 @@ interface ProjectsScreenProps {
 }
 
 export default function ProjectsScreen({ onLogoClick, onStartNewProject }: ProjectsScreenProps) {
-  const [projects, setProjects] = useState<ProjectItem[]>(initialProjects);
+  const { accessToken } = useAuth();
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [view, setView] = useState<ProjectsView>('grid');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<ProjectSort>('updated');
@@ -28,6 +32,27 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
   const [newOpen, setNewOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const undoRef = useRef<{ index: number; project: ProjectItem } | null>(null);
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    let cancelled = false;
+    listProjects(accessToken)
+      .then((apiProjects) => {
+        if (cancelled) return;
+        setProjects(apiProjects.map(toProjectItem));
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoaded(true);
+        setToast({ icon: 'trash', message: '프로젝트 목록을 불러오지 못했어요' });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
 
   const filteredProjects = useMemo(() => {
     let list = projects.filter((project) => project.title.toLowerCase().includes(query.toLowerCase()));
@@ -54,10 +79,20 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
     });
   };
 
-  const deleteProject = (project: ProjectItem) => {
+  const deleteProject = async (project: ProjectItem) => {
+    if (!accessToken) return;
+
     undoRef.current = { project, index: projects.findIndex((item) => item.id === project.id) };
     setProjects((current) => current.filter((item) => item.id !== project.id));
     setDeleteTarget(null);
+
+    try {
+      await deleteProjectRequest(accessToken, project.id, project.version);
+    } catch {
+      setToast({ icon: 'trash', message: '삭제에 실패했어요. 새로고침 후 다시 시도해주세요.' });
+      return;
+    }
+
     setToast({
       icon: 'trash',
       message: `"${project.title}" 삭제됨`,
@@ -65,13 +100,18 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
         label: '실행 취소',
         onClick: () => {
           const undo = undoRef.current;
-          if (!undo) return;
+          if (!undo || !accessToken) return;
 
-          setProjects((current) => {
-            const next = [...current];
-            next.splice(undo.index, 0, undo.project);
-            return next;
-          });
+          restoreProjectRequest(accessToken, undo.project.id, undo.project.version)
+            .then((restored) => {
+              setProjects((current) => {
+                const next = [...current];
+                next.splice(undo.index, 0, toProjectItem(restored));
+                return next;
+              });
+            })
+            .catch(() => setToast({ icon: 'trash', message: '실행 취소에 실패했어요.' }));
+
           setToast(null);
           undoRef.current = null;
         },
@@ -80,48 +120,54 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
     });
   };
 
-  const duplicateProject = (project: ProjectItem) => {
-    const duplicate: ProjectItem = {
-      ...project,
-      id: `p${Date.now()}`,
-      starred: false,
-      title: `${project.title} 복사본`,
-      updated: '방금 전',
-    };
+  const duplicateProject = async (project: ProjectItem) => {
+    if (!accessToken) return;
 
-    setProjects((current) => [duplicate, ...current]);
-    setToast({ icon: 'copy', message: `"${project.title}" 복제됨` });
+    try {
+      const duplicate = await duplicateProjectRequest(accessToken, project.id);
+      setProjects((current) => [toProjectItem(duplicate), ...current]);
+      setToast({ icon: 'copy', message: `"${project.title}" 복제됨` });
+    } catch {
+      setToast({ icon: 'trash', message: '복제에 실패했어요.' });
+    }
   };
 
-  const toggleStar = (project: ProjectItem) => {
-    setProjects((current) => current.map((item) => (item.id === project.id ? { ...item, starred: !item.starred } : item)));
+  const toggleStar = async (project: ProjectItem) => {
+    if (!accessToken) return;
+
+    try {
+      const updated = await patchProject(accessToken, project.id, { version: project.version, starred: !project.starred });
+      setProjects((current) => current.map((item) => (item.id === project.id ? toProjectItem(updated) : item)));
+    } catch {
+      setToast({ icon: 'trash', message: '즐겨찾기 변경에 실패했어요.' });
+    }
   };
 
-  const renameProject = (project: ProjectItem, title: string) => {
-    setProjects((current) => current.map((item) => (item.id === project.id ? { ...item, title, updated: '방금 전' } : item)));
-    setRenameTarget(null);
-    setToast({ icon: 'check', message: '이름이 변경되었어요' });
+  const renameProject = async (project: ProjectItem, title: string) => {
+    if (!accessToken) return;
+
+    try {
+      const updated = await patchProject(accessToken, project.id, { version: project.version, title });
+      setProjects((current) => current.map((item) => (item.id === project.id ? toProjectItem(updated) : item)));
+      setRenameTarget(null);
+      setToast({ icon: 'check', message: '이름이 변경되었어요' });
+    } catch {
+      setToast({ icon: 'trash', message: '이름 변경에 실패했어요.' });
+    }
   };
 
-  const createProject = ({ format, name }: { format: string; name: string }) => {
-    const project: ProjectItem = {
-      id: `p${Date.now()}`,
-      title: name,
-      status: 'draft',
-      duration: '—',
-      exported: null,
-      scenes: 0,
-      format,
-      sizeMB: 0,
-      palette: projectPalettes[Math.floor(Math.random() * projectPalettes.length)],
-      updated: '방금 전',
-      starred: false,
-    };
+  const createProject = async ({ format, name }: { format: string; name: string }) => {
+    if (!accessToken) return;
 
-    setProjects((current) => [project, ...current]);
-    setNewOpen(false);
-    onStartNewProject({ format, projectName: name });
-    setToast({ icon: 'check', message: '프로젝트가 생성됐어요. 영상을 업로드해보세요!' });
+    try {
+      const created = await createProjectRequest(accessToken, { title: name, format });
+      setProjects((current) => [toProjectItem(created), ...current]);
+      setNewOpen(false);
+      onStartNewProject({ format, projectName: name });
+      setToast({ icon: 'check', message: '프로젝트가 생성됐어요. 영상을 업로드해보세요!' });
+    } catch {
+      setToast({ icon: 'trash', message: '프로젝트 생성에 실패했어요.' });
+    }
   };
 
   const actionHandlers = {
@@ -139,7 +185,7 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
         <ProjectsPageHeader count={projects.length} onNewProject={() => setNewOpen(true)} />
         <ProjectsToolbar onQueryChange={setQuery} onSortChange={setSort} onViewChange={setView} query={query} sort={sort} view={view} />
 
-        {filteredProjects.length === 0 && query ? (
+        {loaded && filteredProjects.length === 0 && query ? (
           <EmptySearchState onClear={() => setQuery('')} query={query} />
         ) : view === 'grid' ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
@@ -158,9 +204,9 @@ export default function ProjectsScreen({ onLogoClick, onStartNewProject }: Proje
         )}
       </main>
 
-      {deleteTarget && <DeleteProjectModal onCancel={() => setDeleteTarget(null)} onConfirm={deleteProject} project={deleteTarget} />}
-      {renameTarget && <RenameProjectModal onCancel={() => setRenameTarget(null)} onRename={renameProject} project={renameTarget} />}
-      {newOpen && <NewProjectModal onCancel={() => setNewOpen(false)} onCreate={createProject} />}
+      {deleteTarget && <DeleteProjectModal onCancel={() => setDeleteTarget(null)} onConfirm={(project) => void deleteProject(project)} project={deleteTarget} />}
+      {renameTarget && <RenameProjectModal onCancel={() => setRenameTarget(null)} onRename={(project, title) => void renameProject(project, title)} project={renameTarget} />}
+      {newOpen && <NewProjectModal onCancel={() => setNewOpen(false)} onCreate={(input) => void createProject(input)} />}
       <Toast onDismiss={() => setToast(null)} toast={toast} />
     </div>
   );

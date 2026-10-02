@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useTheme } from '@/App';
+import { ApiV1Error } from '@/api/v1Client';
 import Icon from '@/components/Icon';
 import MonoLabel from '@/components/MonoLabel';
 import PillButton from '@/components/PillButton';
@@ -7,6 +8,7 @@ import { icons } from '@/components/icons';
 import AuthCheckbox from '@/components/AuthScreen/AuthCheckbox';
 import AuthField from '@/components/AuthScreen/AuthField';
 import StrengthMeter from '@/components/AuthScreen/StrengthMeter';
+import { useAuth } from '@/lib/authContext';
 import { isValidEmail } from '@/lib/validation';
 
 interface SignupFormProps {
@@ -23,6 +25,7 @@ interface SignupErrors {
 
 export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
   const { accent } = useTheme();
+  const { signup } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +34,7 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<SignupErrors>({});
 
-  const submit = (event?: FormEvent<HTMLFormElement>) => {
+  const submit = async (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
     const nextErrors: SignupErrors = {};
 
@@ -46,10 +49,30 @@ export default function SignupForm({ onSubmit, onSwitch }: SignupFormProps) {
     if (Object.keys(nextErrors).length > 0) return;
 
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
+    try {
+      await signup({ name, email, password, termsAccepted: agree, marketingConsent: agreeMarketing });
       onSubmit();
-    }, 1000);
+    } catch (error) {
+      if (error instanceof ApiV1Error) {
+        if (error.code === 'EMAIL_ALREADY_EXISTS') {
+          setErrors({ email: '이미 가입된 이메일이에요' });
+        } else if (error.details.length > 0) {
+          const fieldErrors: SignupErrors = {};
+          for (const detail of error.details) {
+            if (detail.field === 'name' || detail.field === 'email' || detail.field === 'password') {
+              fieldErrors[detail.field] = detail.reason.replace(/^Value error,\s*/, '');
+            }
+          }
+          setErrors(fieldErrors);
+        } else {
+          setErrors({ password: '회원가입에 실패했어요. 잠시 후 다시 시도해주세요.' });
+        }
+      } else {
+        setErrors({ password: '회원가입에 실패했어요. 잠시 후 다시 시도해주세요.' });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

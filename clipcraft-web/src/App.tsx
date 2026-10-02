@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import TweaksPanel from '@/components/TweaksPanel';
 import AppRouter from '@/router/AppRouter';
+import { AuthProvider } from '@/lib/authContext';
 import type { ThemeTweaks } from '@/types/app';
 
 const TWEAK_DEFAULTS: ThemeTweaks = {
@@ -36,7 +37,9 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={themeValue}>
-      <AppRouter />
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
 
       {showTweaks && (
         <TweaksPanel

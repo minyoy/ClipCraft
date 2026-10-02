@@ -5,6 +5,10 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
+from .database import init_db
+from .envelope import register_error_handlers
+from .routers import auth as auth_router
+from .routers import projects as projects_router
 
 app = FastAPI(title="ClipCraft Backend")
 app.add_middleware(
@@ -13,6 +17,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+init_db()
+register_error_handlers(app)
+app.include_router(auth_router.router)
+app.include_router(projects_router.router)
 
 GPU_SERVER_URL = os.environ.get("GPU_SERVER_URL", "http://host.docker.internal:8001").rstrip("/")
 
